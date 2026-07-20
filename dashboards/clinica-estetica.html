@@ -1,0 +1,2708 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard Financeiro — Clínica de Estética</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ─── Reset & Tokens ─────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold-100: #FBF5E8;
+    --gold-200: #F0DFB4;
+    --gold-300: #E8C97A;
+    --gold-400: #D4AF6A;
+    --gold-500: #C6AB7C;
+    --gold-600: #A8893C;
+    --gold-glow: rgba(212,175,106,0.35);
+    --gold-border: rgba(198,171,124,0.30);
+
+    --bg-base: #FAFAFA;
+    --bg-white: #FFFFFF;
+    --bg-card: rgba(255,255,255,0.80);
+    --bg-sidebar: linear-gradient(175deg, #FFFFFF 0%, #FBF8F1 60%, #F5EFE0 100%);
+
+    --text-primary: #2C2C2C;
+    --text-secondary: #5E5E5E;
+    --text-muted: #9B9B9B;
+
+    --up: #2E9E6B;
+    --down: #D64545;
+    --up-bg: rgba(46,158,107,0.10);
+    --down-bg: rgba(214,69,69,0.10);
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-gold: 0 4px 24px rgba(198,171,124,0.18);
+
+    --sidebar-w: 240px;
+    --header-h: 68px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Sidebar ────────────────────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--gold-border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+    box-shadow: 2px 0 20px rgba(198,171,124,0.10);
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--gold-border);
+  }
+
+  .logo-mark {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #2C2C2C 0%, #3E3832 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--gold-300);
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+
+  .logo-text { line-height: 1.2; }
+  .logo-text strong { display: block; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .logo-text span { font-size: 11px; color: var(--gold-500); font-weight: 500; }
+
+  .sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 8px 8px 6px;
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.18s ease;
+    margin-bottom: 2px;
+    position: relative;
+  }
+
+  .nav-item:hover { background: var(--gold-100); color: var(--text-primary); }
+
+  .nav-item.active {
+    background: linear-gradient(90deg, var(--gold-100) 0%, rgba(230,200,140,0.25) 100%);
+    color: var(--gold-600);
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px;
+    background: var(--gold-400);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .nav-item i { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .sidebar-footer {
+    padding: 16px 12px;
+    border-top: 1px solid var(--gold-border);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* ─── Main ───────────────────────────────────────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ─── Header ─────────────────────────────────────────────────────────── */
+  .header {
+    height: var(--header-h);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+  .header-title span { color: var(--gold-500); }
+
+  .header-controls { display: flex; align-items: center; gap: 10px; }
+
+  .filter-group {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-white);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-md);
+    padding: 6px 12px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .filter-group select, .filter-group label {
+    font-size: 12.5px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    border: none; background: none; outline: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .filter-period-btns {
+    display: flex; gap: 2px;
+    background: var(--gold-100);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+  }
+
+  .period-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; border: none; background: none;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .period-btn.active {
+    background: var(--gold-400);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(198,171,124,0.40);
+  }
+
+  .avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--gold-300), var(--gold-500));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    color: #fff; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(198,171,124,0.40);
+    border: 2px solid #fff;
+    flex-shrink: 0;
+  }
+
+  /* ─── Content ────────────────────────────────────────────────────────── */
+  .content { padding: 28px; flex: 1; }
+
+  .section-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--text-muted); letter-spacing: 0.8px;
+    text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--gold-border) 0%, transparent 100%);
+  }
+
+  /* ─── Cards ──────────────────────────────────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.20s ease, box-shadow 0.20s ease, border-color 0.20s ease;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-gold);
+    border-color: rgba(198,171,124,0.55);
+  }
+
+  .card-inner { padding: 20px; }
+
+  /* ─── KPI Grid ───────────────────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card { position: relative; overflow: hidden; }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+  }
+
+  .kpi-icon {
+    width: 40px; height: 40px;
+    background: var(--gold-100);
+    border: 1px solid var(--gold-border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-600);
+    margin-bottom: 12px;
+  }
+
+  .kpi-label {
+    font-size: 11.5px; font-weight: 600;
+    color: var(--text-muted); letter-spacing: 0.3px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .kpi-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11.5px; font-weight: 600;
+    padding: 3px 8px; border-radius: 20px;
+  }
+
+  .kpi-badge.up { background: var(--up-bg); color: var(--up); }
+  .kpi-badge.down { background: var(--down-bg); color: var(--down); }
+
+  .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .kpi-bg-icon {
+    position: absolute; right: 14px; bottom: 12px;
+    opacity: 0.06; color: var(--gold-600);
+  }
+
+  /* ─── Two column row ─────────────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 28px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px; }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 0;
+  }
+
+  .card-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--text-secondary); letter-spacing: 0.2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .card-title i { width: 16px; height: 16px; color: var(--gold-500); }
+
+  .card-action {
+    font-size: 11.5px; color: var(--gold-500); font-weight: 600;
+    cursor: pointer; text-decoration: none;
+  }
+
+  .chart-wrap { padding: 16px 20px 18px; position: relative; }
+
+  /* ─── Table ──────────────────────────────────────────────────────────── */
+  .styled-table { width: 100%; border-collapse: collapse; }
+
+  .styled-table thead th {
+    font-size: 11px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 8px 14px 10px;
+    border-bottom: 1px solid var(--gold-border);
+    text-align: left;
+  }
+
+  .styled-table tbody tr {
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(198,171,124,0.12);
+  }
+
+  .styled-table tbody tr:hover { background: var(--gold-100); }
+  .styled-table tbody tr:last-child { border-bottom: none; }
+
+  .styled-table tbody td {
+    padding: 11px 14px;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .table-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+
+  .prod-bar-wrap { display: flex; align-items: center; gap: 8px; }
+
+  .prod-bar-bg {
+    flex: 1; height: 6px;
+    background: var(--gold-100);
+    border-radius: 10px; overflow: hidden;
+  }
+
+  .prod-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600; }
+
+  /* ─── Gauge / Donut ──────────────────────────────────────────────────── */
+  .gauge-label {
+    text-align: center; margin-top: -24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px; font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .gauge-sub { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── Mini stat row ──────────────────────────────────────────────────── */
+  .mini-stats { display: flex; flex-direction: column; gap: 12px; padding: 0 20px 20px; }
+
+  .mini-stat {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-base);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .mini-stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+
+  .mini-stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* ─── Progress bar ───────────────────────────────────────────────────── */
+  .progress-wrap { margin-top: 6px; }
+
+  .progress-header {
+    display: flex; justify-content: space-between;
+    font-size: 12px; margin-bottom: 5px;
+  }
+
+  .progress-bg {
+    height: 8px; background: var(--gold-100);
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--gold-border);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-300) 0%, var(--gold-500) 100%);
+    border-radius: 10px;
+    position: relative;
+    transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute; right: 0; top: -2px; bottom: -2px;
+    width: 3px; background: var(--gold-600);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--gold-glow);
+  }
+
+  /* ─── Pill tag ───────────────────────────────────────────────────────── */
+  .pill {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+
+  .pill-gold { background: var(--gold-100); color: var(--gold-600); border: 1px solid var(--gold-border); }
+  .pill-up   { background: var(--up-bg);   color: var(--up);   }
+  .pill-down { background: var(--down-bg); color: var(--down); }
+
+  /* ─── Alert strip ────────────────────────────────────────────────────── */
+  .alert-strip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    background: rgba(214,69,69,0.06);
+    border: 1px solid rgba(214,69,69,0.20);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px; color: var(--down);
+    font-weight: 500; margin: 0 20px 16px;
+  }
+
+  /* ─── Footer ─────────────────────────────────────────────────────────── */
+  footer {
+    background: var(--bg-white);
+    border-top: 1px solid var(--gold-border);
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; color: var(--text-muted);
+  }
+
+  footer strong { color: var(--gold-500); }
+
+  /* ─── Neon ───────────────────────────────────────────────────────────── */
+  :root {
+    --neon-gold:  0 0 6px rgba(232,201,122,0.95), 0 0 14px rgba(212,175,106,0.80), 0 0 28px rgba(198,171,124,0.55), 0 0 50px rgba(198,171,124,0.30);
+    --neon-green: 0 0 6px rgba(46,200,120,0.95),  0 0 14px rgba(46,180,107,0.80),  0 0 28px rgba(46,158,107,0.55),  0 0 50px rgba(46,158,107,0.30);
+    --neon-red:   0 0 6px rgba(255,80,80,0.95),   0 0 14px rgba(214,69,69,0.80),   0 0 28px rgba(214,69,69,0.55),   0 0 50px rgba(214,69,69,0.30);
+    --neon-icon-gold:  drop-shadow(0 0 4px rgba(232,201,122,0.95)) drop-shadow(0 0 10px rgba(212,175,106,0.70)) drop-shadow(0 0 20px rgba(198,171,124,0.45));
+    --neon-icon-green: drop-shadow(0 0 4px rgba(46,200,120,0.95))  drop-shadow(0 0 10px rgba(46,180,107,0.70))  drop-shadow(0 0 20px rgba(46,158,107,0.45));
+    --neon-icon-red:   drop-shadow(0 0 4px rgba(255,80,80,0.95))   drop-shadow(0 0 10px rgba(214,69,69,0.70))   drop-shadow(0 0 20px rgba(214,69,69,0.45));
+  }
+
+  /* ── KPI values: bons em verde, ruins em vermelho ── */
+  [data-kpi="fatBruto"]    { color: var(--up);   text-shadow: var(--neon-green); }
+  [data-kpi="lucroLiq"]    { color: var(--up);   text-shadow: var(--neon-green); }
+  [data-kpi="ticketMedio"] { color: var(--up);   text-shadow: var(--neon-green); }
+  [data-kpi="margem"]      { color: var(--up);   text-shadow: var(--neon-green); }
+  [data-kpi="ltv"]         { color: var(--up);   text-shadow: var(--neon-green); }
+  [data-kpi="cac"]         { color: var(--down); text-shadow: var(--neon-red);   }
+
+  /* ── Entradas vs Saídas ── */
+  #ms-entradas { text-shadow: var(--neon-green); }
+  #ms-saidas   { text-shadow: var(--neon-red);   }
+  #ms-saldo    { color: var(--up); text-shadow: var(--neon-green); }
+
+  /* ── Mini-stats de custo (vermelhos) ── */
+  .mini-stat-value[style*="var(--down)"] { text-shadow: var(--neon-red); }
+
+  /* ── Prejuízo no-show ── */
+  .alert-strip strong { text-shadow: var(--neon-red); }
+
+  /* ── Badges ↑↓ ── */
+  .kpi-badge.up   { text-shadow: var(--neon-green); }
+  .kpi-badge.down { text-shadow: var(--neon-red);   }
+
+  /* ── Elementos que já eram dourados ── */
+  .nav-item.active          { text-shadow: var(--neon-gold); }
+  .nav-item.active i        { filter: var(--neon-icon-gold); }
+  .logo-mark                { text-shadow: var(--neon-gold); }
+  .logo-text span           { text-shadow: var(--neon-gold); }
+  .card-action              { text-shadow: var(--neon-gold); }
+  .card-title i             { filter: var(--neon-icon-gold); }
+  .filter-group i           { filter: var(--neon-icon-gold); }
+  #profTable .com-val       { text-shadow: var(--neon-gold); }
+  .pill-gold                { text-shadow: var(--neon-gold); }
+
+  /* Config Drawer ─────────────────────────────────────────────────────── */
+  .cfg-tab {
+    flex:1; padding:11px 6px; border:none; background:none;
+    font-size:12px; font-weight:600; color:var(--text-muted);
+    cursor:pointer; border-bottom:2px solid transparent;
+    font-family:'Inter',sans-serif; transition:all 0.15s;
+  }
+  .cfg-tab:hover { color:var(--text-primary); background:var(--gold-100); }
+  .cfg-tab.active { color:var(--gold-600); border-bottom-color:var(--gold-400); background:var(--gold-100); }
+
+  .cfg-section-label {
+    font-size:10.5px; font-weight:700; color:var(--text-muted);
+    letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;
+    padding-bottom:6px; border-bottom:1px solid var(--gold-border);
+  }
+
+  .cfg-field { display:flex; flex-direction:column; gap:5px; }
+  .cfg-field label { font-size:12px; font-weight:600; color:var(--text-secondary); }
+  .cfg-field input, .cfg-field select {
+    padding:8px 11px;
+    border:1px solid var(--gold-border);
+    border-radius:var(--radius-sm);
+    font-size:13px; font-family:'Inter',sans-serif;
+    color:var(--text-primary); background:var(--bg-white);
+    outline:none; transition:border-color 0.15s, box-shadow 0.15s;
+  }
+  .cfg-field input:focus, .cfg-field select:focus {
+    border-color:var(--gold-400);
+    box-shadow:0 0 0 3px var(--gold-glow);
+  }
+
+  .cfg-prof-row {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 12px;
+    background:var(--bg-base); border:1px solid var(--gold-border);
+    border-radius:var(--radius-sm);
+  }
+  .cfg-prof-row .table-avatar { width:28px; height:28px; font-size:10px; flex-shrink:0; }
+  .cfg-prof-row .prof-name { font-size:12.5px; font-weight:600; flex:1; color:var(--text-primary); }
+  .cfg-prof-row input[type="number"] {
+    width:62px; padding:5px 8px; text-align:center;
+    font-size:12px; font-family:'JetBrains Mono',monospace;
+  }
+  .cfg-prof-row .cfg-rate-label { font-size:11px; color:var(--text-muted); }
+  .cfg-prof-row .cfg-del-btn {
+    width:26px; height:26px; border:1px solid rgba(214,69,69,0.25);
+    border-radius:6px; background:rgba(214,69,69,0.06);
+    color:var(--down); cursor:pointer; display:flex;
+    align-items:center; justify-content:center; flex-shrink:0;
+    transition:all 0.15s;
+  }
+  .cfg-prof-row .cfg-del-btn:hover { background:rgba(214,69,69,0.15); }
+
+  .cfg-add-btn {
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:9px; margin-top:4px;
+    border:1.5px dashed var(--gold-border); border-radius:var(--radius-sm);
+    background:none; color:var(--gold-500); font-size:12.5px; font-weight:600;
+    font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.15s;
+    width:100%;
+  }
+  .cfg-add-btn:hover { background:var(--gold-100); border-color:var(--gold-400); }
+
+  .cfg-toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:#2C2C2C; color:#fff; padding:10px 20px;
+    border-radius:var(--radius-sm); font-size:13px; font-weight:500;
+    box-shadow:var(--shadow-md); z-index:300; opacity:0;
+    transition:all 0.25s ease; pointer-events:none; white-space:nowrap;
+  }
+  .cfg-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ─── Edit Mode ──────────────────────────────────────────────────────── */
+  .edit-toggle {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 600;
+    cursor: pointer; border: 1.5px solid var(--gold-border);
+    background: var(--bg-white);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.18s;
+  }
+
+  .edit-toggle:hover { border-color: var(--gold-400); color: var(--gold-600); }
+  .edit-toggle.active { background: var(--gold-400); border-color: var(--gold-400); color: #fff; box-shadow: 0 2px 10px var(--gold-glow); }
+  .edit-toggle i { width: 14px; height: 14px; }
+
+  /* Editable field */
+  .body-edit [data-editable] {
+    cursor: text;
+    border-radius: 6px;
+    outline: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+
+  .body-edit [data-editable]:hover {
+    background: var(--gold-100);
+    box-shadow: 0 0 0 2px var(--gold-border);
+  }
+
+  .body-edit [data-editable]:focus {
+    background: var(--bg-white);
+    box-shadow: 0 0 0 2px var(--gold-400);
+  }
+
+  /* Editable table cell */
+  .body-edit td[data-editable] {
+    min-width: 80px;
+  }
+
+  /* Edit hint pulse on cards when edit mode active */
+  .body-edit .kpi-card::after {
+    content: '✏️';
+    position: absolute; top: 10px; right: 12px;
+    font-size: 10px; opacity: 0.4;
+  }
+
+  /* Chart edit panel */
+  .chart-edit-panel {
+    display: none;
+    background: var(--gold-100);
+    border-top: 1px solid var(--gold-border);
+    padding: 14px 20px;
+    flex-direction: column; gap: 8px;
+  }
+
+  .body-edit .chart-edit-panel { display: flex; }
+
+  .chart-edit-panel .edit-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px;
+  }
+
+  .chart-edit-panel .edit-row label {
+    width: 160px; color: var(--text-secondary); font-weight: 500; flex-shrink: 0;
+  }
+
+  .chart-edit-panel .edit-row input {
+    flex: 1;
+    padding: 5px 10px;
+    border: 1px solid var(--gold-border);
+    border-radius: 6px;
+    font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-white); color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .chart-edit-panel .edit-row input:focus { border-color: var(--gold-400); }
+
+  .chart-edit-panel .apply-btn {
+    align-self: flex-end;
+    padding: 6px 16px;
+    background: var(--gold-400); color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .chart-edit-panel .apply-btn:hover { background: var(--gold-600); }
+
+  .chart-edit-title {
+    font-size: 11px; font-weight: 700;
+    color: var(--gold-600); letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+
+  /* Edit mode banner */
+  .edit-banner {
+    display: none;
+    background: linear-gradient(90deg, var(--gold-300), var(--gold-400));
+    color: #fff;
+    font-size: 12px; font-weight: 600;
+    padding: 8px 28px;
+    align-items: center; gap: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .body-edit .edit-banner { display: flex; }
+
+  /* ─── Animations ─────────────────────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in { animation: fadeUp 0.45s ease both; }
+
+  .a1 { animation-delay: 0.05s; }
+  .a2 { animation-delay: 0.10s; }
+  .a3 { animation-delay: 0.15s; }
+  .a4 { animation-delay: 0.20s; }
+  .a5 { animation-delay: 0.25s; }
+  .a6 { animation-delay: 0.30s; }
+  .a7 { animation-delay: 0.35s; }
+  .a8 { animation-delay: 0.40s; }
+
+  /* ─── Responsive ─────────────────────────────────────────────────────── */
+  @media (max-width: 1200px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-3   { grid-template-columns: repeat(2, 1fr); }
+    .grid-1-2, .grid-2-1 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 900px) {
+    :root { --sidebar-w: 0px; }
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .grid-3   { grid-template-columns: 1fr; }
+    .header-controls .filter-group:not(:last-child) { display: none; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">CE</div>
+    <div class="logo-text">
+      <strong>Clínica Estética</strong>
+      <span>Painel Financeiro</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <div class="nav-item active" onclick="navTo(this,'sec-dashboard')">
+      <i data-lucide="layout-dashboard"></i> Dashboard
+    </div>
+    <div class="nav-item" onclick="navTo(this,'sec-fluxo')">
+      <i data-lucide="trending-up"></i> Fluxo de Caixa
+    </div>
+    <div class="nav-item" onclick="navTo(this,'sec-servicos')">
+      <i data-lucide="sparkles"></i> Serviços
+    </div>
+
+    <div class="nav-section-label" style="margin-top:10px;">Gestão</div>
+    <div class="nav-item" onclick="navTo(this,'sec-profissionais')">
+      <i data-lucide="users"></i> Profissionais
+    </div>
+    <div class="nav-item" onclick="navTo(this,'sec-agendamentos')">
+      <i data-lucide="calendar-check"></i> Agendamentos
+    </div>
+    <div class="nav-item" onclick="navTo(this,'sec-relatorios')">
+      <i data-lucide="file-bar-chart-2"></i> Relatórios
+    </div>
+
+    <div class="nav-section-label" style="margin-top:10px;">Sistema</div>
+    <div class="nav-item" id="navConfig" onclick="openConfig()">
+      <i data-lucide="settings-2"></i> Configurações
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    Versão 2.4.1<br/>© 2025 Clínica de Estética
+  </div>
+</aside>
+
+<!-- ═══ MAIN ════════════════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-title">Dashboard <span>/ Visão Geral</span></div>
+    <div class="header-controls">
+      <div class="filter-period-btns">
+        <button class="period-btn" onclick="setPeriod(this)">Dia</button>
+        <button class="period-btn" onclick="setPeriod(this)">Sem.</button>
+        <button class="period-btn active" onclick="setPeriod(this)">Mês</button>
+        <button class="period-btn" onclick="setPeriod(this)">Ano</button>
+      </div>
+      <div class="filter-group">
+        <i data-lucide="user-circle" style="width:14px;height:14px;color:var(--gold-500)"></i>
+        <select id="filterProfissional" onchange="applyProfFilter(this.value)">
+          <option value="">Todos os Profissionais</option>
+          <option value="Dra. Camila Rocha">Dra. Camila Rocha</option>
+          <option value="Beatriz Santos">Beatriz Santos</option>
+          <option value="Fernanda Lima">Fernanda Lima</option>
+          <option value="Juliana Costa">Juliana Costa</option>
+          <option value="Aline Ferreira">Aline Ferreira</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <i data-lucide="filter" style="width:14px;height:14px;color:var(--gold-500)"></i>
+        <select>
+          <option>Todos os Procedimentos</option>
+          <option>Corporal</option>
+          <option>Facial</option>
+          <option>Injetáveis</option>
+        </select>
+      </div>
+      <button class="edit-toggle" id="editToggle" onclick="toggleEditMode()">
+        <i data-lucide="pencil"></i> Editar
+      </button>
+      <div class="avatar">AS</div>
+    </div>
+  </header>
+
+  <!-- Edit banner -->
+  <div class="edit-banner">
+    <i data-lucide="pencil-line" style="width:14px;height:14px"></i>
+    Modo de edição ativo — clique em qualquer valor para editar. Pressione Enter ou clique fora para confirmar.
+  </div>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- ── KPIs ──────────────────────────────────────────────────────── -->
+    <div class="section-title" id="sec-dashboard">Indicadores do Período — Junho 2025</div>
+
+    <div class="kpi-grid">
+
+      <div class="card kpi-card animate-in a1">
+        <div class="card-inner">
+          <div class="kpi-icon"><i data-lucide="circle-dollar-sign"></i></div>
+          <div class="kpi-label">Faturamento Bruto</div>
+          <div class="kpi-value" data-count="148320" data-prefix="R$&nbsp;" data-suffix="" data-decimals="2" data-editable data-kpi="fatBruto">R$ 0,00</div>
+          <span class="kpi-badge up" id="badge-fatBruto">↑ 12,4%</span>
+          <div class="kpi-sub" id="sub-fatBruto">vs. maio/2025: R$ 131.962,00</div>
+        </div>
+        <i data-lucide="banknote" class="kpi-bg-icon" style="width:64px;height:64px"></i>
+      </div>
+
+      <div class="card kpi-card animate-in a2">
+        <div class="card-inner">
+          <div class="kpi-icon"><i data-lucide="trending-up"></i></div>
+          <div class="kpi-label">Lucro Líquido</div>
+          <div class="kpi-value" data-count="61750" data-prefix="R$&nbsp;" data-suffix="" data-decimals="2" data-editable data-kpi="lucroLiq">R$ 0,00</div>
+          <span class="kpi-badge up" id="badge-lucroLiq">↑ 8,1%</span>
+          <div class="kpi-sub" id="sub-lucroLiq">Margem líquida: 41,6%</div>
+        </div>
+        <i data-lucide="chart-no-axes-combined" class="kpi-bg-icon" style="width:64px;height:64px"></i>
+      </div>
+
+      <div class="card kpi-card animate-in a3">
+        <div class="card-inner">
+          <div class="kpi-icon"><i data-lucide="receipt"></i></div>
+          <div class="kpi-label">Ticket Médio / Cliente</div>
+          <div class="kpi-value" data-count="487" data-prefix="R$&nbsp;" data-suffix="" data-decimals="2" data-editable data-kpi="ticketMedio">R$ 0,00</div>
+          <span class="kpi-badge up" id="badge-ticketMedio">↑ 5,3%</span>
+          <div class="kpi-sub" id="sub-ticketMedio">304 atendimentos no mês</div>
+        </div>
+        <i data-lucide="tag" class="kpi-bg-icon" style="width:64px;height:64px"></i>
+      </div>
+
+      <div class="card kpi-card animate-in a4">
+        <div class="card-inner">
+          <div class="kpi-icon"><i data-lucide="percent"></i></div>
+          <div class="kpi-label">Margem por Procedimento</div>
+          <div class="kpi-value" data-count="58.4" data-prefix="" data-suffix="%" data-decimals="1" data-editable data-kpi="margem">0%</div>
+          <span class="kpi-badge up" id="badge-margem">↑ 2,8 pp</span>
+          <div class="kpi-sub" id="sub-margem">Meta: 55% — superada</div>
+        </div>
+        <i data-lucide="pie-chart" class="kpi-bg-icon" style="width:64px;height:64px"></i>
+      </div>
+
+      <div class="card kpi-card animate-in a5">
+        <div class="card-inner">
+          <div class="kpi-icon"><i data-lucide="user-plus"></i></div>
+          <div class="kpi-label">CAC — Custo de Aquisição</div>
+          <div class="kpi-value" data-count="138" data-prefix="R$&nbsp;" data-suffix="" data-decimals="2" data-editable data-kpi="cac">R$ 0,00</div>
+          <span class="kpi-badge down" id="badge-cac">↑ 3,2%</span>
+          <div class="kpi-sub" id="sub-cac">38 novos clientes no mês</div>
+        </div>
+        <i data-lucide="mouse-pointer-click" class="kpi-bg-icon" style="width:64px;height:64px"></i>
+      </div>
+
+      <div class="card kpi-card animate-in a6">
+        <div class="card-inner">
+          <div class="kpi-icon"><i data-lucide="heart-handshake"></i></div>
+          <div class="kpi-label">LTV — Lifetime Value</div>
+          <div class="kpi-value" data-count="3640" data-prefix="R$&nbsp;" data-suffix="" data-decimals="2" data-editable data-kpi="ltv">R$ 0,00</div>
+          <span class="kpi-badge up" id="badge-ltv">↑ 14,7%</span>
+          <div class="kpi-sub" id="sub-ltv">Relação LTV/CAC: 26,4×</div>
+        </div>
+        <i data-lucide="infinity" class="kpi-bg-icon" style="width:64px;height:64px"></i>
+      </div>
+
+    </div><!-- /kpi-grid -->
+
+    <!-- ── Fluxo de Caixa ─────────────────────────────────────────────── -->
+    <div class="section-title" id="sec-fluxo">Fluxo de Caixa e Custos</div>
+
+    <div class="grid-2-1">
+      <!-- Gráfico Entradas vs Saídas -->
+      <div class="card animate-in a1">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="waves"></i> Entradas × Saídas Diárias — Junho</div>
+          <span class="card-action">Ver detalhe →</span>
+        </div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="cashflowChart"></canvas>
+        </div>
+        <div style="display:flex;gap:16px;padding:0 20px 16px;flex-wrap:wrap">
+          <div class="mini-stat" style="flex:1;min-width:120px">
+            <span class="mini-stat-label">Total Entradas</span>
+            <span class="mini-stat-value" style="color:var(--up)" data-editable data-fmt="brl" id="ms-entradas">R$ 148.320</span>
+          </div>
+          <div class="mini-stat" style="flex:1;min-width:120px">
+            <span class="mini-stat-label">Total Saídas</span>
+            <span class="mini-stat-value" style="color:var(--down)" data-editable data-fmt="brl" id="ms-saidas">R$ 86.570</span>
+          </div>
+          <div class="mini-stat" style="flex:1;min-width:120px">
+            <span class="mini-stat-label">Saldo Líquido</span>
+            <span class="mini-stat-value" id="ms-saldo">R$ 61.750</span>
+          </div>
+        </div>
+        <!-- Chart edit panel: cashflow -->
+        <div class="chart-edit-panel" id="editPanel-cashflow">
+          <div class="chart-edit-title">✏️ Editar dados do gráfico de fluxo de caixa</div>
+          <div class="edit-row"><label>Entradas (separadas por vírgula)</label><input id="cf-entradas" value="4200,3800,5100,4600,5800,4900,6200,5400,4800,5200,6100,4700,5600,5900,4300,5700,6400,5100,4900,5500,6800,5300,4600,5800,6200,4800,5400,6100,5200,5900"/></div>
+          <div class="edit-row"><label>Saídas (separadas por vírgula)</label><input id="cf-saidas" value="2800,2600,3100,2900,3400,2700,3800,3200,2900,3100,3600,2800,3300,3500,2500,3400,3800,3100,2900,3300,4100,3200,2800,3500,3700,2900,3200,3700,3100,3600"/></div>
+          <button class="apply-btn" onclick="applyCashflow()">Aplicar</button>
+        </div>
+      </div>
+
+      <!-- Breakdown recebíveis + custos -->
+      <div class="card animate-in a2" style="display:flex;flex-direction:column">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="credit-card"></i> Recebíveis</div>
+        </div>
+        <div class="mini-stats" style="margin-top:12px">
+          <div class="mini-stat">
+            <span class="mini-stat-label">💳 Cartão (parcelado)</span>
+            <span class="mini-stat-value" data-editable data-fmt="brl">R$ 62.394</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">💳 Cartão (à vista)</span>
+            <span class="mini-stat-value" data-editable data-fmt="brl">R$ 44.496</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">🏦 PIX / TED</span>
+            <span class="mini-stat-value" data-editable data-fmt="brl">R$ 29.664</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">💵 Dinheiro</span>
+            <span class="mini-stat-value" data-editable data-fmt="brl">R$ 11.766</span>
+          </div>
+        </div>
+
+        <div class="card-header" style="margin-top:8px">
+          <div class="card-title"><i data-lucide="package-open"></i> Custos Principais</div>
+        </div>
+        <div class="mini-stats" style="margin-top:8px">
+          <div class="mini-stat">
+            <span class="mini-stat-label">Insumos e materiais</span>
+            <span class="mini-stat-value" style="color:var(--down)" data-editable data-fmt="brl">R$ 24.180</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Manutenção equipamentos</span>
+            <span class="mini-stat-value" style="color:var(--down)" data-editable data-fmt="brl">R$ 8.400</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Despesas fixas</span>
+            <span class="mini-stat-value" style="color:var(--down)" data-editable data-fmt="brl">R$ 29.740</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Comissões</span>
+            <span class="mini-stat-value" style="color:var(--down)" data-editable data-fmt="brl">R$ 24.250</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Profissionais ───────────────────────────────────────────────── -->
+    <div class="section-title" id="sec-profissionais">Controle de Profissionais e Comissões</div>
+
+    <div class="card animate-in a1" style="margin-bottom:28px">
+      <div class="card-header" style="padding-bottom:14px">
+        <div class="card-title"><i data-lucide="users-round"></i> Desempenho Individual — Junho 2025</div>
+        <span class="card-action">Exportar →</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Profissional</th>
+              <th>Especialidade</th>
+              <th>Procedimentos</th>
+              <th>Faturamento</th>
+              <th>Produtividade</th>
+              <th>Comissão (16%)</th>
+              <th>Sala</th>
+            </tr>
+          </thead>
+          <tbody id="profTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Serviços ───────────────────────────────────────────────────── -->
+    <div class="section-title" id="sec-servicos">Desempenho de Serviços</div>
+
+    <div class="grid-2">
+      <!-- Mais lucrativos -->
+      <div class="card animate-in a1">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="award"></i> Procedimentos Mais Lucrativos</div>
+        </div>
+        <div class="chart-wrap" style="height:300px">
+          <canvas id="lucratividadeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Mais vendidos + pacotes -->
+      <div class="card animate-in a2">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="bar-chart-3"></i> Mais Vendidos</div>
+        </div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="vendidosChart"></canvas>
+        </div>
+        <div class="card-header" style="margin-top:4px">
+          <div class="card-title"><i data-lucide="package-check"></i> Pacotes e Home Care</div>
+        </div>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span class="mini-stat-label">📦 Pacotes vendidos (unid.)</span>
+            <span class="mini-stat-value">47 pacotes</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">💰 Receita de pacotes</span>
+            <span class="mini-stat-value">R$ 38.420</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">🧴 Receita home care</span>
+            <span class="mini-stat-value">R$ 12.840</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Retenção ───────────────────────────────────────────────────── -->
+    <div class="section-title" id="sec-agendamentos">Retenção, Conversão e Agendamentos</div>
+
+    <div class="grid-3">
+
+      <!-- Conversão avaliação → contrato -->
+      <div class="card animate-in a1">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="git-branch"></i> Conversão Avaliação</div>
+        </div>
+        <div class="chart-wrap" style="height:180px">
+          <canvas id="conversaoChart"></canvas>
+        </div>
+        <div class="gauge-label" id="conversaoLabel">0%</div>
+        <div class="gauge-sub">avaliações → contratos</div>
+        <div class="mini-stats" style="margin-top:10px">
+          <div class="mini-stat">
+            <span class="mini-stat-label">Avaliações realizadas</span>
+            <span class="mini-stat-value">53</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Contratos fechados</span>
+            <span class="mini-stat-value" style="color:var(--up)">38</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ociosidade / No-show -->
+      <div class="card animate-in a2">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="calendar-x-2"></i> Ociosidade & No-show</div>
+        </div>
+        <div class="chart-wrap" style="height:180px">
+          <canvas id="ociosidadeChart"></canvas>
+        </div>
+        <div class="alert-strip" style="margin-top:0">
+          <i data-lucide="alert-circle" style="width:14px;height:14px;flex-shrink:0"></i>
+          Prejuízo no-show: <strong>R$ 4.320,00</strong>
+        </div>
+        <div class="mini-stats" style="margin-top:0">
+          <div class="mini-stat">
+            <span class="mini-stat-label">Ociosidade média salas</span>
+            <span class="mini-stat-value" style="color:var(--down)">18,4%</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Taxa de no-show</span>
+            <span class="mini-stat-value" style="color:var(--down)">8,2%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recompra -->
+      <div class="card animate-in a3">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="refresh-cw"></i> Retenção de Clientes</div>
+        </div>
+        <div class="chart-wrap" style="height:180px">
+          <canvas id="retencaoChart"></canvas>
+        </div>
+        <div class="mini-stats" style="margin-top:0">
+          <div class="mini-stat">
+            <span class="mini-stat-label">Taxa de retorno (30d)</span>
+            <span class="mini-stat-value" style="color:var(--up)">68,3%</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Clientes fiéis (&gt;3 visitas)</span>
+            <span class="mini-stat-value">127 clientes</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-label">Churn mensal</span>
+            <span class="mini-stat-value" style="color:var(--down)">4,7%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Orçado vs Realizado ─────────────────────────────────────────── -->
+    <div class="section-title" id="sec-relatorios">Planejamento — Orçado × Realizado 2025</div>
+
+    <div class="grid-1-2" style="margin-bottom:0">
+
+      <!-- Meta do mês -->
+      <div class="card animate-in a1">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="target"></i> Meta de Faturamento — Jun/25</div>
+        </div>
+        <div class="card-inner" style="padding-top:12px">
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">Realizado</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:var(--text-primary)">R$ 148.320</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Meta: R$ 135.000,00</div>
+
+          <div class="progress-wrap">
+            <div class="progress-header">
+              <span style="font-weight:600;color:var(--up)">109,9% atingido</span>
+              <span style="color:var(--text-muted)">R$ 13.320 acima</span>
+            </div>
+            <div class="progress-bg">
+              <div class="progress-fill" style="width:100%" id="metaBar"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span style="font-size:12px;color:var(--text-secondary)">Injetáveis</span>
+                <span style="font-size:12px;font-weight:600">R$ 42.800 / R$ 40.000</span>
+              </div>
+              <div class="progress-bg"><div class="progress-fill" style="width:100%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span style="font-size:12px;color:var(--text-secondary)">Facial</span>
+                <span style="font-size:12px;font-weight:600">R$ 38.640 / R$ 42.000</span>
+              </div>
+              <div class="progress-bg"><div class="progress-fill" style="width:92%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span style="font-size:12px;color:var(--text-secondary)">Corporal</span>
+                <span style="font-size:12px;font-weight:600">R$ 54.040 / R$ 45.000</span>
+              </div>
+              <div class="progress-bg"><div class="progress-fill" style="width:100%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orçado vs realizado anual -->
+      <div class="card animate-in a2">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="bar-chart-2"></i> Orçado × Realizado — Jan–Jun 2025</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="orcadoChart"></canvas>
+        </div>
+        <div class="chart-edit-panel" id="editPanel-orcado">
+          <div class="chart-edit-title">✏️ Editar metas e realizados — Jan–Jun 2025</div>
+          <div class="edit-row"><label>Orçado (Jan–Jun, vírgula)</label><input id="orc-orcado" value="118000,122000,125000,128000,130000,135000"/></div>
+          <div class="edit-row"><label>Realizado (Jan–Jun, vírgula)</label><input id="orc-realizado" value="114200,126800,129400,133600,131962,148320"/></div>
+          <button class="apply-btn" onclick="applyOrcado()">Aplicar</button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <span>Sistema <strong>CE Finance</strong> v2.4.1 · Última atualização: <strong>28/06/2025 às 09:47</strong></span>
+    <span>Período: Junho 2025 · Filial: Matriz São Paulo</span>
+  </footer>
+</div><!-- /main -->
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════════════════════ */
+const PROFISSIONAIS = [
+  { nome:'Dra. Camila Rocha',  esp:'Injetáveis',    procs:82, fat:42800, sala:'Sala 1', cor:'#C6AB7C' },
+  { nome:'Beatriz Santos',     esp:'Facial',        procs:74, fat:28640, sala:'Sala 2', cor:'#8CB4A8' },
+  { nome:'Fernanda Lima',      esp:'Corporal',      procs:68, fat:35200, sala:'Sala 3', cor:'#B8A6D0' },
+  { nome:'Juliana Costa',      esp:'Laser',         procs:56, fat:22480, sala:'Sala 2', cor:'#D4906A' },
+  { nome:'Aline Ferreira',     esp:'Radiofrequência',procs:24, fat:19200, sala:'Sala 4', cor:'#7CA8C6' },
+];
+const MAX_FAT = Math.max(...PROFISSIONAIS.map(p => p.fat));
+
+/* Chart defaults */
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#9B9B9B';
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════════════════ */
+function brl(n) {
+  return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function initials(nome) {
+  return nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COUNTER ANIMATION
+══════════════════════════════════════════════════════════════════════════ */
+function animateCounter(el) {
+  const target   = parseFloat(el.dataset.count);
+  const prefix   = el.dataset.prefix || '';
+  const suffix   = el.dataset.suffix || '';
+  const decimals = parseInt(el.dataset.decimals || '0');
+  const duration = 1400;
+  const start    = performance.now();
+
+  function ease(t) { return t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+  function tick(now) {
+    const elapsed = Math.min(now - start, duration);
+    const prog = ease(elapsed / duration);
+    const val  = prog * target;
+    el.innerHTML = prefix + val.toLocaleString('pt-BR', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    }) + suffix;
+    if (elapsed < duration) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════════════════════════════════ */
+/* buildTable is defined later with full edit support */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════════════════════════════════ */
+
+/* Palette */
+const GOLD_GRAD = ['#E8C97A','#D4AF6A','#C6AB7C','#B89660','#A8893C'];
+const GOLD_ALPHA = (a) => `rgba(198,171,124,${a})`;
+
+/* 1. Fluxo de Caixa — delegates to the updatable version above */
+
+/* 2. Procedimentos mais lucrativos */
+function buildLucratividade() {
+  const labels = ['Toxina Botulínica','Laser CO₂','Radiofrequência','Peeling Químico','Lipoaspiração LAL','Limpeza de Pele','Preenchimento'];
+  const data   = [42800,35200,28640,22480,19200,16800,13400];
+  const colors = GOLD_GRAD.concat(['#9B8A60','#7A6B44']);
+
+  new Chart(document.getElementById('lucratividadeChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets:[{
+        data,
+        backgroundColor: colors.map(c => c + 'CC'),
+        borderColor:     colors,
+        borderWidth: 1.5,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis:'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend:{display:false},
+        tooltip:{ callbacks:{ label: ctx => ' '+brl(ctx.raw) } }
+      },
+      scales: {
+        x: {
+          grid:{color:'rgba(198,171,124,0.10)'},
+          ticks:{ callback: v=>'R$ '+(v/1000).toFixed(0)+'k', font:{size:10} }
+        },
+        y: { grid:{display:false}, ticks:{font:{size:11}} }
+      }
+    }
+  });
+}
+
+/* 3. Mais vendidos */
+function buildVendidos() {
+  const labels = ['Limpeza de Pele','Toxina Botulínica','Radiofrequência','Peeling','Laser','Preenchimento','Massagem'];
+  const data   = [68,54,48,42,36,28,22];
+
+  new Chart(document.getElementById('vendidosChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets:[{
+        label:'Procedimentos',
+        data,
+        backgroundColor: GOLD_ALPHA(0.7),
+        borderColor: '#C6AB7C',
+        borderWidth: 1.5,
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{grid:{display:false}, ticks:{font:{size:10}}},
+        y:{grid:{color:'rgba(198,171,124,0.10)'}, ticks:{font:{size:10}}}
+      }
+    }
+  });
+}
+
+/* 4. Conversão (donut) */
+function buildConversao() {
+  const val = 71.7;
+  document.getElementById('conversaoLabel').textContent = val.toFixed(1) + '%';
+
+  new Chart(document.getElementById('conversaoChart'), {
+    type:'doughnut',
+    data:{
+      datasets:[{
+        data:[val, 100-val],
+        backgroundColor:['#D4AF6A', 'rgba(198,171,124,0.12)'],
+        borderColor:['#C6AB7C','rgba(198,171,124,0.10)'],
+        borderWidth:2,
+        hoverOffset:4,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'74%',
+      plugins:{ legend:{display:false}, tooltip:{enabled:false} }
+    }
+  });
+}
+
+/* 5. Ociosidade salas (doughnut) */
+function buildOciosidade() {
+  new Chart(document.getElementById('ociosidadeChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Sala 1','Sala 2','Sala 3','Sala 4'],
+      datasets:[{
+        data:[12,22,18,22],
+        backgroundColor:['#D4AF6A','#C6AB7C','#B89660','#A8893C'],
+        borderColor:'#fff',
+        borderWidth:3,
+        hoverOffset:6,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'60%',
+      plugins:{
+        legend:{ position:'right', labels:{ boxWidth:10, font:{size:11} } },
+        tooltip:{ callbacks:{ label: ctx => ctx.label+': '+ctx.raw+'% ociosa' } }
+      }
+    }
+  });
+}
+
+/* 6. Retenção (polar) */
+function buildRetencao() {
+  new Chart(document.getElementById('retencaoChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Retornaram','Novos','Perdidos'],
+      datasets:[{
+        data:[68.3, 12.5, 19.2],
+        backgroundColor:['#2E9E6B','#D4AF6A','#D64545'],
+        borderColor:'#fff',
+        borderWidth:3,
+        hoverOffset:4,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'60%',
+      plugins:{
+        legend:{ position:'right', labels:{ boxWidth:10, font:{size:11} } },
+        tooltip:{ callbacks:{ label: ctx => ctx.label+': '+ctx.raw+'%' } }
+      }
+    }
+  });
+}
+
+/* 7. Orçado vs Realizado — uses orcData, supports live update */
+function buildOrcado() {
+  if (CHARTS.orcado) { CHARTS.orcado.destroy(); }
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun'];
+  CHARTS.orcado = new Chart(document.getElementById('orcadoChart'), {
+    type:'bar',
+    data:{
+      labels:months,
+      datasets:[
+        { label:'Orçado', data:orcData.orcado,
+          backgroundColor:'rgba(198,171,124,0.25)', borderColor:'rgba(198,171,124,0.55)',
+          borderWidth:1.5, borderRadius:5 },
+        { label:'Realizado', data:orcData.realizado,
+          backgroundColor:(ctx)=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,250); g.addColorStop(0,'rgba(212,175,106,0.90)'); g.addColorStop(1,'rgba(198,171,124,0.55)'); return g; },
+          borderColor:'#C6AB7C', borderWidth:1.5, borderRadius:5 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{labels:{boxWidth:10,font:{size:12}}},
+        tooltip:{callbacks:{label:ctx=>' '+brl(ctx.raw)}} },
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:'rgba(198,171,124,0.10)'},ticks:{callback:v=>'R$ '+(v/1000).toFixed(0)+'k',font:{size:10}}}
+      }
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHART INSTANCES (for live update)
+══════════════════════════════════════════════════════════════════════════ */
+const CHARTS = {};
+
+/* Override builders to store instances */
+const _buildCashflow = buildCashflow;
+function buildCashflow() {
+  if (CHARTS.cashflow) { CHARTS.cashflow.destroy(); }
+  const labels = Array.from({length:30},(_,i)=>i+1);
+  const entradas = cfData.entradas;
+  const saidas   = cfData.saidas;
+  CHARTS.cashflow = new Chart(document.getElementById('cashflowChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Entradas', data:entradas, fill:true, tension:0.4, borderColor:'#C6AB7C', borderWidth:2.5,
+          backgroundColor:(ctx)=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,220); g.addColorStop(0,'rgba(198,171,124,0.28)'); g.addColorStop(1,'rgba(198,171,124,0.02)'); return g; },
+          pointRadius:0, pointHoverRadius:5 },
+        { label:'Saídas', data:saidas, fill:true, tension:0.4, borderColor:'#D64545', borderWidth:2, borderDash:[5,3],
+          backgroundColor:'rgba(214,69,69,0.07)', pointRadius:0, pointHoverRadius:5 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{position:'top',labels:{boxWidth:10,padding:16,font:{size:12}}},
+        tooltip:{callbacks:{label:ctx=>' '+brl(ctx.raw)}} },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},maxTicksLimit:10}},
+        y:{grid:{color:'rgba(198,171,124,0.10)'},ticks:{callback:v=>'R$ '+(v/1000).toFixed(0)+'k',font:{size:10}}}
+      }
+    }
+  });
+}
+
+const cfData = {
+  entradas: [4200,3800,5100,4600,5800,4900,6200,5400,4800,5200,6100,4700,5600,5900,4300,5700,6400,5100,4900,5500,6800,5300,4600,5800,6200,4800,5400,6100,5200,5900],
+  saidas:   [2800,2600,3100,2900,3400,2700,3800,3200,2900,3100,3600,2800,3300,3500,2500,3400,3800,3100,2900,3300,4100,3200,2800,3500,3700,2900,3200,3700,3100,3600]
+};
+
+const orcData = {
+  orcado:    [118000,122000,125000,128000,130000,135000],
+  realizado: [114200,126800,129400,133600,131962,148320]
+};
+
+function applyCashflow() {
+  const parseList = id => document.getElementById(id).value.split(',').map(v=>parseFloat(v.trim())||0);
+  cfData.entradas = parseList('cf-entradas');
+  cfData.saidas   = parseList('cf-saidas');
+  buildCashflow();
+}
+
+function applyOrcado() {
+  const parseList = id => document.getElementById(id).value.split(',').map(v=>parseFloat(v.trim())||0);
+  orcData.orcado    = parseList('orc-orcado');
+  orcData.realizado = parseList('orc-realizado');
+  buildOrcado();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EDIT MODE
+══════════════════════════════════════════════════════════════════════════ */
+let editMode = false;
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn  = document.getElementById('editToggle');
+  const body = document.body;
+
+  if (editMode) {
+    body.classList.add('body-edit');
+    btn.classList.add('active');
+    btn.innerHTML = '<i data-lucide="x"></i> Sair da edição';
+    enableEditables();
+  } else {
+    body.classList.remove('body-edit');
+    btn.classList.remove('active');
+    btn.innerHTML = '<i data-lucide="pencil"></i> Editar';
+    disableEditables();
+  }
+  lucide.createIcons();
+}
+
+function enableEditables() {
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    el.setAttribute('contenteditable', 'true');
+    el.setAttribute('spellcheck', 'false');
+
+    // Store raw numeric value for parsing on blur
+    el._rawValue = parseDisplayValue(el.textContent);
+
+    el.addEventListener('focus', onEditFocus);
+    el.addEventListener('blur',  onEditBlur);
+    el.addEventListener('keydown', onEditKey);
+  });
+}
+
+function disableEditables() {
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    el.setAttribute('contenteditable', 'false');
+    el.removeEventListener('focus', onEditFocus);
+    el.removeEventListener('blur',  onEditBlur);
+    el.removeEventListener('keydown', onEditKey);
+  });
+}
+
+function onEditFocus(e) {
+  const el = e.currentTarget;
+  // Show raw number for easy editing
+  const raw = el._rawValue ?? parseDisplayValue(el.textContent);
+  el.textContent = raw.toString().replace('.', ',');
+  // Select all
+  setTimeout(() => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }, 10);
+}
+
+function onEditBlur(e) {
+  const el = e.currentTarget;
+  const raw = parseInputValue(el.textContent);
+  el._rawValue = isNaN(raw) ? (el._rawValue ?? 0) : raw;
+  formatEditable(el);
+  // Recompute derived KPIs
+  recomputeKpis();
+  // Recompute saldo
+  recomputeSaldo();
+}
+
+function onEditKey(e) {
+  if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); }
+  if (e.key === 'Escape') {
+    const el = e.currentTarget;
+    el._rawValue = el._rawValue ?? 0;
+    formatEditable(el);
+    el.blur();
+  }
+}
+
+function formatEditable(el) {
+  const v = el._rawValue ?? 0;
+  const fmt = el.dataset.fmt;
+  const kpi = el.dataset.kpi;
+
+  if (kpi) {
+    // KPI value — use original format
+    const prefix   = el.dataset.prefix || '';
+    const suffix   = el.dataset.suffix || '';
+    const decimals = parseInt(el.dataset.decimals || '0');
+    el.innerHTML = prefix + v.toLocaleString('pt-BR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals}) + suffix;
+  } else if (fmt === 'brl') {
+    el.textContent = 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+  } else {
+    el.textContent = v.toLocaleString('pt-BR');
+  }
+}
+
+function parseDisplayValue(text) {
+  // "R$ 148.320,50" → 148320.50 | "58,4%" → 58.4
+  const clean = text.replace(/R\$\s?/,'').replace('%','').replace(/\./g,'').replace(',','.').trim();
+  return parseFloat(clean) || 0;
+}
+
+function parseInputValue(text) {
+  // User types "148320" or "148.320" or "148320,50"
+  const clean = text.replace(/R\$\s?/,'').replace('%','').trim()
+                    .replace(/\./g,'').replace(',','.');
+  return parseFloat(clean);
+}
+
+function recomputeKpis() {
+  // LTV / CAC ratio
+  const ltvEl = document.querySelector('[data-kpi="ltv"]');
+  const cacEl = document.querySelector('[data-kpi="cac"]');
+  if (ltvEl && cacEl) {
+    const ltv = ltvEl._rawValue ?? 3640;
+    const cac = cacEl._rawValue ?? 138;
+    const ratio = cac > 0 ? (ltv / cac).toFixed(1) : '—';
+    const sub = document.getElementById('sub-ltv');
+    if (sub) sub.textContent = 'Relação LTV/CAC: ' + ratio + '×';
+  }
+  // Margem sub
+  const margemEl = document.querySelector('[data-kpi="margem"]');
+  if (margemEl) {
+    const m = margemEl._rawValue ?? 58.4;
+    const sub = document.getElementById('sub-margem');
+    if (sub) sub.textContent = m >= 55 ? 'Meta: 55% — superada' : 'Meta: 55% — abaixo da meta';
+  }
+  // Lucro líquido → margem sub
+  const fatEl  = document.querySelector('[data-kpi="fatBruto"]');
+  const lucEl  = document.querySelector('[data-kpi="lucroLiq"]');
+  if (fatEl && lucEl) {
+    const fat = fatEl._rawValue ?? 148320;
+    const luc = lucEl._rawValue ?? 61750;
+    const marg = fat > 0 ? ((luc / fat) * 100).toFixed(1) : 0;
+    const sub = document.getElementById('sub-lucroLiq');
+    if (sub) sub.textContent = 'Margem líquida: ' + marg + '%';
+  }
+}
+
+function recomputeSaldo() {
+  const entradasEl = document.getElementById('ms-entradas');
+  const saidasEl   = document.getElementById('ms-saidas');
+  const saldoEl    = document.getElementById('ms-saldo');
+  if (!entradasEl || !saidasEl || !saldoEl) return;
+  const ent = entradasEl._rawValue ?? 148320;
+  const sai = saidasEl._rawValue   ?? 86570;
+  const sal = ent - sai;
+  saldoEl.textContent = 'R$ ' + sal.toLocaleString('pt-BR', {minimumFractionDigits:0});
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TABLE EDIT — rebuild with editable cells
+══════════════════════════════════════════════════════════════════════════ */
+function buildTable() {
+  const tbody = document.getElementById('profTable');
+  tbody.innerHTML = '';
+  PROFISSIONAIS.forEach((p, idx) => {
+    const pct = Math.round((p.fat / MAX_FAT) * 100);
+    const comissao = p.fat * 0.16;
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="table-avatar" style="background:${p.cor}">${initials(p.nome)}</div>
+          <span class="body-edit-show" data-editable data-fmt="text" data-idx="${idx}" data-field="nome" style="font-weight:600">${p.nome}</span>
+        </div>
+      </td>
+      <td><span class="pill pill-gold" data-editable data-fmt="text" data-idx="${idx}" data-field="esp">${p.esp}</span></td>
+      <td class="mono" data-editable data-fmt="num" data-idx="${idx}" data-field="procs">${p.procs}</td>
+      <td class="mono" data-editable data-fmt="brl" data-idx="${idx}" data-field="fat">${brl(p.fat)}</td>
+      <td style="min-width:160px">
+        <div class="prod-bar-wrap">
+          <div class="prod-bar-bg">
+            <div class="prod-bar-fill" style="width:0%" data-width="${pct}%"></div>
+          </div>
+          <span class="bar-pct" style="font-size:12px;font-weight:600;color:var(--text-secondary);min-width:36px">${pct}%</span>
+        </div>
+      </td>
+      <td class="mono com-val" style="color:var(--gold-600);font-weight:700">${brl(comissao)}</td>
+      <td><span class="pill pill-gold">${p.sala}</span></td>`;
+    tbody.appendChild(row);
+
+    // Wire up table cell editables
+    row.querySelectorAll('[data-editable][data-field]').forEach(cell => {
+      cell.setAttribute('contenteditable', 'false');
+      cell.setAttribute('spellcheck', 'false');
+      cell._rawValue = p[cell.dataset.field];
+
+      cell.addEventListener('focus', onEditFocus);
+      cell.addEventListener('keydown', onEditKey);
+      cell.addEventListener('blur', function() {
+        const raw = parseInputValue(this.textContent);
+        const field = this.dataset.field;
+        const i = parseInt(this.dataset.idx);
+        if (field === 'nome' || field === 'esp' || field === 'sala') {
+          PROFISSIONAIS[i][field] = this.textContent.trim();
+          this._rawValue = this.textContent.trim();
+        } else {
+          const val = isNaN(raw) ? PROFISSIONAIS[i][field] : raw;
+          PROFISSIONAIS[i][field] = val;
+          this._rawValue = val;
+          if (field === 'fat') {
+            // Recalculate comissao and bar
+            const newFat = val;
+            const newCom = newFat * 0.16;
+            const newMax = Math.max(...PROFISSIONAIS.map(p=>p.fat));
+            const newPct = Math.round((newFat / newMax) * 100);
+            const tr = this.closest('tr');
+            tr.querySelector('.com-val').textContent = brl(newCom);
+            tr.querySelector('.prod-bar-fill').dataset.width = newPct + '%';
+            tr.querySelector('.prod-bar-fill').style.width = newPct + '%';
+            tr.querySelector('.bar-pct').textContent = newPct + '%';
+            formatEditable(this);
+            return;
+          }
+        }
+        formatEditable(this);
+      });
+    });
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.prod-bar-fill[data-width]').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 200);
+
+  // If edit mode already on, enable new cells
+  if (editMode) {
+    tbody.querySelectorAll('[data-editable]').forEach(el => {
+      el.setAttribute('contenteditable', 'true');
+    });
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NAV / PERIOD HELPERS
+══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   CONFIGURAÇÕES — DRAWER
+══════════════════════════════════════════════════════════════════════════ */
+const TAXAS = {};  // nome → taxa individual (%)
+
+function openConfig() {
+  // Marca nav item como ativo
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('navConfig').classList.add('active');
+
+  // Popula lista de comissões
+  const comList = document.getElementById('cfg-comissoes-list');
+  comList.innerHTML = '';
+  PROFISSIONAIS.forEach(p => {
+    const taxa = TAXAS[p.nome] ?? 16;
+    comList.innerHTML += `
+      <div class="cfg-prof-row">
+        <div class="table-avatar" style="background:${p.cor}">${initials(p.nome)}</div>
+        <span class="prof-name">${p.nome}</span>
+        <input type="number" value="${taxa}" min="1" max="60" step="0.5"
+          data-prof="${p.nome}" class="com-rate-input" />
+        <span class="cfg-rate-label">%</span>
+      </div>`;
+  });
+
+  // Popula lista de equipe
+  renderProfsList();
+
+  // Abre overlay e drawer
+  const overlay = document.getElementById('configOverlay');
+  const drawer  = document.getElementById('configDrawer');
+  overlay.style.display = 'block';
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    drawer.style.transform = 'translateX(0)';
+  });
+  lucide.createIcons();
+}
+
+function closeConfig() {
+  const overlay = document.getElementById('configOverlay');
+  const drawer  = document.getElementById('configDrawer');
+  overlay.style.opacity = '0';
+  drawer.style.transform = 'translateX(100%)';
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  // Retira destaque do nav item
+  document.getElementById('navConfig').classList.remove('active');
+}
+
+function cfgTab(btn, tabId) {
+  document.querySelectorAll('.cfg-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cfg-panel').forEach(p => p.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById(tabId).style.display = 'flex';
+  document.getElementById(tabId).style.flexDirection = 'column';
+  document.getElementById(tabId).style.gap = '16px';
+}
+
+function renderProfsList() {
+  const list = document.getElementById('cfg-profs-list');
+  list.innerHTML = '';
+  PROFISSIONAIS.forEach((p, i) => {
+    list.innerHTML += `
+      <div class="cfg-prof-row">
+        <div class="table-avatar" style="background:${p.cor}">${initials(p.nome)}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+          <input type="text" value="${p.nome}" data-pidx="${i}" data-pfield="nome"
+            class="cfg-prof-input" style="font-weight:600" />
+          <input type="text" value="${p.esp}" data-pidx="${i}" data-pfield="esp"
+            class="cfg-prof-input" style="color:var(--text-muted);font-size:11.5px" />
+        </div>
+        <input type="text" value="${p.sala}" data-pidx="${i}" data-pfield="sala"
+          class="cfg-prof-input" style="width:70px;text-align:center;font-size:11.5px" />
+        <button class="cfg-del-btn" onclick="removeProfissional(${i})">
+          <i data-lucide="trash-2" style="width:12px;height:12px"></i>
+        </button>
+      </div>`;
+  });
+  lucide.createIcons();
+
+  // Listeners para edição inline dos campos
+  list.querySelectorAll('.cfg-prof-input').forEach(inp => {
+    inp.style.background = 'transparent';
+    inp.style.border = 'none';
+    inp.style.outline = 'none';
+    inp.style.fontFamily = "'Inter', sans-serif";
+    inp.style.padding = '0';
+    inp.style.width = '100%';
+    inp.addEventListener('focus', () => inp.style.borderBottom = '1px solid var(--gold-400)');
+    inp.addEventListener('blur',  () => inp.style.borderBottom = 'none');
+  });
+}
+
+function addProfissional() {
+  const cores = ['#C6AB7C','#8CB4A8','#B8A6D0','#D4906A','#7CA8C6','#A8C67C','#D4A8C6'];
+  const novaCor = cores[PROFISSIONAIS.length % cores.length];
+  PROFISSIONAIS.push({ nome:'Novo Profissional', esp:'Especialidade', procs:0, fat:0, sala:'Sala 1', cor:novaCor });
+  renderProfsList();
+  // Atualiza o select do header
+  syncProfSelect();
+}
+
+function removeProfissional(idx) {
+  if (PROFISSIONAIS.length <= 1) { showToast('A equipe precisa ter ao menos 1 profissional.'); return; }
+  PROFISSIONAIS.splice(idx, 1);
+  renderProfsList();
+}
+
+function applyConfig() {
+  // ── Aba Clínica ──────────────────────────────────────────────────────
+  const nome     = document.getElementById('cfg-nome').value.trim()     || 'Clínica de Estética';
+  const filial   = document.getElementById('cfg-filial').value.trim()   || 'Matriz São Paulo';
+  const iniciais = document.getElementById('cfg-iniciais').value.trim().toUpperCase().slice(0,3) || 'CE';
+  const mes      = document.getElementById('cfg-mes').value;
+  const ano      = document.getElementById('cfg-ano').value;
+  const cor      = document.getElementById('cfg-cor').value;
+
+  // Atualiza logo e nome na sidebar
+  document.querySelector('.logo-mark').textContent = iniciais;
+  document.querySelector('.logo-text strong').textContent = nome;
+
+  // Atualiza título da seção e rodapé
+  const secKpi = document.getElementById('sec-dashboard');
+  if (secKpi) secKpi.textContent = `Indicadores do Período — ${mes} ${ano}`;
+  document.querySelector('footer span:last-child').textContent =
+    `Período: ${mes} ${ano} · Filial: ${filial}`;
+  document.querySelector('footer span:first-child').innerHTML =
+    `Sistema <strong>${nome.split(' ').slice(0,2).join(' ')}</strong> v2.4.1 · Última atualização: <strong>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</strong>`;
+
+  // Aplica cor de destaque dinamicamente
+  applyThemeColor(cor);
+
+  // ── Aba Metas ────────────────────────────────────────────────────────
+  const metaFat    = parseFloat(document.getElementById('cfg-meta-fat').value)  || 135000;
+  const metaInj    = parseFloat(document.getElementById('cfg-meta-inj').value)  || 40000;
+  const metaFac    = parseFloat(document.getElementById('cfg-meta-fac').value)  || 42000;
+  const metaCorp   = parseFloat(document.getElementById('cfg-meta-corp').value) || 45000;
+
+  // Atualiza textos de meta na seção de planejamento
+  const metaEl = document.querySelector('[data-kpi="fatBruto"]');
+  const fatAtual = metaEl ? (metaEl._rawValue ?? 148320) : 148320;
+  const metaPct  = ((fatAtual / metaFat) * 100).toFixed(1);
+  const metaSub  = document.querySelector('.progress-wrap .progress-header span:first-child');
+  if (metaSub) metaSub.textContent = `${metaPct}% atingido`;
+  const metaLabel = document.querySelector('.progress-wrap').previousElementSibling;
+  // Update meta display text
+  document.querySelectorAll('.progress-wrap')[0]?.querySelector('.progress-header span:last-child')
+    ?.setAttribute('data-meta', metaFat);
+
+  // ── Aba Comissões ────────────────────────────────────────────────────
+  document.querySelectorAll('.com-rate-input').forEach(inp => {
+    const nome = inp.dataset.prof;
+    const taxa = parseFloat(inp.value) || 16;
+    TAXAS[nome] = taxa;
+  });
+  // Reconstrói a tabela com novas taxas
+  rebuildTableWithTaxas();
+
+  // ── Aba Equipe ───────────────────────────────────────────────────────
+  document.querySelectorAll('#cfg-profs-list .cfg-prof-input').forEach(inp => {
+    const idx   = parseInt(inp.dataset.pidx);
+    const field = inp.dataset.pfield;
+    if (PROFISSIONAIS[idx]) PROFISSIONAIS[idx][field] = inp.value.trim();
+  });
+  buildTable();
+  syncProfSelect();
+
+  closeConfig();
+  showToast('✅ Configurações aplicadas com sucesso!');
+}
+
+function rebuildTableWithTaxas() {
+  const tbody = document.getElementById('profTable');
+  tbody.querySelectorAll('tr').forEach(row => {
+    const nameEl = row.querySelector('[data-field="nome"]');
+    if (!nameEl) return;
+    const nome  = nameEl.textContent.trim();
+    const taxa  = TAXAS[nome] ?? 16;
+    const fatEl = row.querySelector('[data-field="fat"]');
+    if (!fatEl) return;
+    const fat = fatEl._rawValue ?? parseDisplayValue(fatEl.textContent);
+    const comissao = fat * (taxa / 100);
+    const comEl = row.querySelector('.com-val');
+    if (comEl) comEl.textContent = brl(comissao);
+  });
+}
+
+function syncProfSelect() {
+  const sel = document.getElementById('filterProfissional');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todos os Profissionais</option>';
+  PROFISSIONAIS.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.nome; opt.textContent = p.nome;
+    if (p.nome === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function applyThemeColor(hex) {
+  // Gera variantes claras e escuras a partir da cor escolhida
+  document.documentElement.style.setProperty('--gold-400', hex);
+  // Versão mais clara (+30% luminosidade aproximada via opacity)
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  const lighten = (v,f) => Math.min(255,Math.round(v+(255-v)*f));
+  const darken  = (v,f) => Math.round(v*(1-f));
+  const l300 = `rgb(${lighten(r,.25)},${lighten(g,.25)},${lighten(b,.25)})`;
+  const l100 = `rgb(${lighten(r,.80)},${lighten(g,.80)},${lighten(b,.80)})`;
+  const l600 = `rgb(${darken(r,.25)},${darken(g,.25)},${darken(b,.25)})`;
+  const border= `rgba(${r},${g},${b},0.30)`;
+  const glow  = `rgba(${r},${g},${b},0.35)`;
+  document.documentElement.style.setProperty('--gold-300', l300);
+  document.documentElement.style.setProperty('--gold-100', l100);
+  document.documentElement.style.setProperty('--gold-600', l600);
+  document.documentElement.style.setProperty('--gold-border', border);
+  document.documentElement.style.setProperty('--gold-glow',   glow);
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('cfgToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'cfgToast';
+    toast.className = 'cfg-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FILTRO DE PROFISSIONAL
+══════════════════════════════════════════════════════════════════════════ */
+// Totais gerais (referência para restaurar "Todos")
+const TOTAIS = {
+  fatBruto:   148320,
+  lucroLiq:   61750,
+  ticketMedio:487,
+  margem:     58.4,
+  cac:        138,
+  ltv:        3640,
+};
+
+function applyProfFilter(nome) {
+  const isAll = !nome;
+
+  // ── Tabela: destaca / esmaece linhas ──────────────────────────────────
+  const rows = document.querySelectorAll('#profTable tr');
+  rows.forEach(row => {
+    const nameCell = row.querySelector('[data-field="nome"]') ||
+                     row.querySelector('span[style*="font-weight:600"]');
+    const rowName  = nameCell ? nameCell.textContent.trim() : '';
+    if (isAll) {
+      row.style.opacity   = '';
+      row.style.transform = '';
+    } else if (rowName === nome) {
+      row.style.opacity   = '1';
+      row.style.transform = 'scale(1.005)';
+      row.style.background = 'var(--gold-100)';
+    } else {
+      row.style.opacity   = '0.28';
+      row.style.transform = '';
+      row.style.background = '';
+    }
+  });
+
+  // ── KPIs: recalcula para o profissional selecionado ───────────────────
+  let vals;
+  if (isAll) {
+    vals = { ...TOTAIS };
+  } else {
+    const p = PROFISSIONAIS.find(x => x.nome === nome);
+    if (!p) return;
+    const margem  = 58.4;
+    const lucro   = +(p.fat * (margem / 100)).toFixed(0);
+    const ticket  = p.procs > 0 ? +(p.fat / p.procs).toFixed(0) : 0;
+    const ltvRatio = (TOTAIS.ltv / TOTAIS.fatBruto) * p.fat;
+    vals = {
+      fatBruto:    p.fat,
+      lucroLiq:    lucro,
+      ticketMedio: ticket,
+      margem:      margem,
+      cac:         TOTAIS.cac,
+      ltv:         +ltvRatio.toFixed(0),
+    };
+  }
+
+  // Anima KPI values
+  const kpiMap = {
+    fatBruto:    { prefix:'R$ ', suffix:'', decimals:2 },
+    lucroLiq:    { prefix:'R$ ', suffix:'', decimals:2 },
+    ticketMedio: { prefix:'R$ ', suffix:'', decimals:2 },
+    margem:      { prefix:'',         suffix:'%', decimals:1 },
+    cac:         { prefix:'R$ ', suffix:'', decimals:2 },
+    ltv:         { prefix:'R$ ', suffix:'', decimals:2 },
+  };
+
+  Object.entries(vals).forEach(([key, target]) => {
+    const el = document.querySelector(`[data-kpi="${key}"]`);
+    if (!el) return;
+    const { prefix, suffix, decimals } = kpiMap[key];
+    const duration = 600;
+    const startVal = parseDisplayValue(el.textContent);
+    const startTime = performance.now();
+    function ease(t) { return 1 - Math.pow(1 - t, 3); }
+    function tick(now) {
+      const prog = Math.min((now - startTime) / duration, 1);
+      const cur  = startVal + (target - startVal) * ease(prog);
+      el.innerHTML = prefix + cur.toLocaleString('pt-BR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      }) + suffix;
+      el._rawValue = target;
+      if (prog < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+
+  // Atualiza sub-textos dos KPIs
+  if (!isAll) {
+    const p = PROFISSIONAIS.find(x => x.nome === nome);
+    const sub = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    sub('sub-fatBruto',    `${p.procs} procedimentos · ${p.sala}`);
+    sub('sub-lucroLiq',    `Margem líquida: ${vals.margem}%`);
+    sub('sub-ticketMedio', `${p.procs} atendimentos no mês`);
+    sub('sub-margem',      `Meta: 55% — ${vals.margem >= 55 ? 'superada' : 'abaixo'}`);
+    sub('sub-ltv',         `LTV/CAC: ${(vals.ltv / vals.cac).toFixed(1)}×`);
+  } else {
+    const sub = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    sub('sub-fatBruto',    'vs. maio/2025: R$ 131.962,00');
+    sub('sub-lucroLiq',    'Margem líquida: 41,6%');
+    sub('sub-ticketMedio', '304 atendimentos no mês');
+    sub('sub-margem',      'Meta: 55% — superada');
+    sub('sub-ltv',         'Relação LTV/CAC: 26,4×');
+  }
+
+  // Atualiza título da seção no header
+  const headerTitle = document.querySelector('.header-title');
+  if (headerTitle) {
+    headerTitle.innerHTML = isAll
+      ? 'Dashboard <span>/ Visão Geral</span>'
+      : `Dashboard <span>/ ${nome}</span>`;
+  }
+
+  // Rola para profissionais para mostrar o destaque
+  if (!isAll) {
+    const sec = document.getElementById('sec-profissionais');
+    if (sec) {
+      const top = sec.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
+}
+
+function navTo(el, sectionId) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const target = document.getElementById(sectionId);
+  if (target) {
+    const offset = 80; // header height + breathing room
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+}
+
+function setActive(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setPeriod(el) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  buildTable();
+  buildCashflow();
+  buildLucratividade();
+  buildVendidos();
+  buildConversao();
+  buildOciosidade();
+  buildRetencao();
+  buildOrcado();
+
+  // Animate KPI counters
+  document.querySelectorAll('[data-count]').forEach(el => animateCounter(el));
+
+  // Init _rawValue for mini-stats after counters finish
+  setTimeout(() => {
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      if (!el._rawValue) el._rawValue = parseDisplayValue(el.textContent);
+    });
+  }, 1600);
+});
+</script>
+<!-- ═══ ANIMATION STYLES ════════════════════════════════════════════════ -->
+<style>
+  /* ── Scroll reveal base ───────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1);
+  }
+  .reveal.from-left  { transform: translateX(-40px); }
+  .reveal.from-right { transform: translateX(40px); }
+  .reveal.from-bottom{ transform: translateY(50px) scale(0.97); }
+  .reveal.visible {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Stagger siblings */
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+    transition: opacity 0.50s ease, transform 0.50s cubic-bezier(0.22,1,0.36,1);
+  }
+  .reveal-stagger.visible > *:nth-child(1) { transition-delay: 0.00s; }
+  .reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.08s; }
+  .reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.16s; }
+  .reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.24s; }
+  .reveal-stagger.visible > *:nth-child(5) { transition-delay: 0.32s; }
+  .reveal-stagger.visible > *:nth-child(6) { transition-delay: 0.40s; }
+  .reveal-stagger.visible > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── Card 3-D tilt ────────────────────────────────────────────────── */
+  .tilt-card {
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .tilt-card:hover { box-shadow: var(--shadow-gold), 0 16px 48px rgba(198,171,124,0.18); }
+
+  /* ── Mouse-follow spotlight ───────────────────────────────────────── */
+  #mouseSpotlight {
+    pointer-events: none;
+    position: fixed;
+    width: 480px; height: 480px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,175,106,0.07) 0%, transparent 70%);
+    transform: translate(-50%,-50%);
+    z-index: 0;
+    transition: opacity 0.4s ease;
+    opacity: 0;
+  }
+
+  /* ── Floating background orbs ─────────────────────────────────────── */
+  .bg-orb {
+    position: fixed; border-radius: 50%;
+    pointer-events: none; z-index: 0;
+    filter: blur(80px);
+    animation: orbFloat linear infinite;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  @keyframes orbFloat {
+    0%   { transform: translateY(0px)   rotate(0deg);   opacity: 0.045; }
+    25%  { transform: translateY(-28px) rotate(90deg);  opacity: 0.070; }
+    50%  { transform: translateY(-14px) rotate(180deg); opacity: 0.055; }
+    75%  { transform: translateY(-32px) rotate(270deg); opacity: 0.070; }
+    100% { transform: translateY(0px)   rotate(360deg); opacity: 0.045; }
+  }
+
+  /* ── Section title slide-in underline ────────────────────────────── */
+  .section-title {
+    overflow: hidden;
+    position: relative;
+  }
+  .section-title .title-text {
+    display: inline-block;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease;
+  }
+  .section-title.visible .title-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* ── Nav item hover slide ─────────────────────────────────────────── */
+  .nav-item {
+    overflow: hidden;
+  }
+  .nav-item::after {
+    content: '';
+    position: absolute; left: -100%; top: 0; bottom: 0;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(198,171,124,0.12), transparent);
+    transition: left 0.4s ease;
+  }
+  .nav-item:hover::after { left: 100%; }
+
+  /* ── KPI card shimmer sweep ───────────────────────────────────────── */
+  @keyframes shimmerSweep {
+    0%   { left: -100%; }
+    100% { left: 200%;  }
+  }
+  .kpi-card .shimmer {
+    position: absolute; top: 0; bottom: 0; width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(232,201,122,0.08), transparent);
+    pointer-events: none;
+    animation: shimmerSweep 3.5s ease-in-out infinite;
+  }
+
+  /* ── Table row slide ──────────────────────────────────────────────── */
+  #profTable tr {
+    opacity: 0;
+    transform: translateX(-16px);
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22,1,0.36,1), background 0.15s;
+  }
+  #profTable tr.row-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── Chart wrapper fade-scale ─────────────────────────────────────── */
+  .chart-wrap canvas {
+    opacity: 0;
+    transition: opacity 0.7s ease 0.2s;
+  }
+  .chart-wrap.chart-ready canvas { opacity: 1; }
+
+  /* ── Sidebar slide-in on load ─────────────────────────────────────── */
+  .sidebar {
+    animation: sidebarIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes sidebarIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+  }
+
+  /* ── Header drop-in ───────────────────────────────────────────────── */
+  .header {
+    animation: headerIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+  }
+  @keyframes headerIn {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  /* ── Scroll progress bar at top ───────────────────────────────────── */
+  #scrollBar {
+    position: fixed; top: 0; left: var(--sidebar-w); right: 0;
+    height: 2.5px; z-index: 999;
+    background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+    transform-origin: left;
+    transform: scaleX(0);
+    box-shadow: 0 0 8px rgba(232,201,122,0.80), 0 0 18px rgba(212,175,106,0.50);
+    transition: transform 0.05s linear;
+  }
+</style>
+
+<!-- scroll progress bar -->
+<div id="scrollBar"></div>
+<!-- mouse spotlight -->
+<div id="mouseSpotlight"></div>
+<!-- floating orbs -->
+<div class="bg-orb" style="width:360px;height:360px;background:radial-gradient(circle,rgba(212,175,106,0.5),transparent);top:10%;left:5%;animation-duration:18s;animation-delay:0s"></div>
+<div class="bg-orb" style="width:260px;height:260px;background:radial-gradient(circle,rgba(198,171,124,0.5),transparent);top:55%;right:4%;animation-duration:24s;animation-delay:-8s"></div>
+<div class="bg-orb" style="width:180px;height:180px;background:radial-gradient(circle,rgba(232,201,122,0.5),transparent);bottom:15%;left:30%;animation-duration:30s;animation-delay:-14s"></div>
+
+<!-- ═══ CONFIGURAÇÕES DRAWER ════════════════════════════════════════════ -->
+<div id="configOverlay" onclick="closeConfig()" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.30);
+  backdrop-filter:blur(3px); z-index:200; opacity:0;
+  transition:opacity 0.25s ease;"></div>
+
+<aside id="configDrawer" style="
+  position:fixed; top:0; right:0; bottom:0; width:440px; max-width:95vw;
+  background:#fff; z-index:201;
+  box-shadow:-8px 0 40px rgba(0,0,0,0.12);
+  transform:translateX(100%); transition:transform 0.30s cubic-bezier(0.4,0,0.2,1);
+  display:flex; flex-direction:column; overflow:hidden;
+  border-left:1px solid var(--gold-border);">
+
+  <!-- Header do drawer -->
+  <div style="
+    padding:20px 24px; border-bottom:1px solid var(--gold-border);
+    background:linear-gradient(90deg,#fff 0%,var(--gold-100) 100%);
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,#2C2C2C,#3E3832);
+        border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--gold-300)">
+        <i data-lucide="settings-2" style="width:16px;height:16px"></i>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-primary)">Configurações</div>
+        <div style="font-size:11px;color:var(--text-muted)">Personalize o dashboard</div>
+      </div>
+    </div>
+    <button onclick="closeConfig()" style="
+      width:32px;height:32px;border:1px solid var(--gold-border);border-radius:8px;
+      background:var(--bg-white);cursor:pointer;display:flex;align-items:center;
+      justify-content:center;color:var(--text-secondary);transition:all 0.15s;"
+      onmouseover="this.style.background='var(--gold-100)'" onmouseout="this.style.background='var(--bg-white)'">
+      <i data-lucide="x" style="width:15px;height:15px"></i>
+    </button>
+  </div>
+
+  <!-- Abas -->
+  <div style="display:flex;border-bottom:1px solid var(--gold-border);flex-shrink:0;">
+    <button class="cfg-tab active" onclick="cfgTab(this,'tab-clinica')" data-tab="tab-clinica">🏥 Clínica</button>
+    <button class="cfg-tab" onclick="cfgTab(this,'tab-metas')" data-tab="tab-metas">🎯 Metas</button>
+    <button class="cfg-tab" onclick="cfgTab(this,'tab-comissoes')" data-tab="tab-comissoes">💰 Comissões</button>
+    <button class="cfg-tab" onclick="cfgTab(this,'tab-profs')" data-tab="tab-profs">👤 Equipe</button>
+  </div>
+
+  <!-- Conteúdo das abas -->
+  <div style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px" id="cfgContent">
+
+    <!-- ABA: CLÍNICA -->
+    <div id="tab-clinica" class="cfg-panel">
+      <div class="cfg-section-label">Identidade</div>
+      <div class="cfg-field">
+        <label>Nome da clínica</label>
+        <input id="cfg-nome" type="text" value="Clínica de Estética" />
+      </div>
+      <div class="cfg-field">
+        <label>Filial / Unidade</label>
+        <input id="cfg-filial" type="text" value="Matriz São Paulo" />
+      </div>
+      <div class="cfg-field">
+        <label>Iniciais do logo</label>
+        <input id="cfg-iniciais" type="text" value="CE" maxlength="3" />
+      </div>
+
+      <div class="cfg-section-label" style="margin-top:18px">Período do Dashboard</div>
+      <div class="cfg-field">
+        <label>Mês de referência</label>
+        <select id="cfg-mes">
+          <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+          <option>Abril</option><option>Maio</option><option selected>Junho</option>
+          <option>Julho</option><option>Agosto</option><option>Setembro</option>
+          <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+        </select>
+      </div>
+      <div class="cfg-field">
+        <label>Ano</label>
+        <input id="cfg-ano" type="number" value="2025" min="2020" max="2030" />
+      </div>
+
+      <div class="cfg-section-label" style="margin-top:18px">Aparência</div>
+      <div class="cfg-field">
+        <label>Cor de destaque</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="cfg-cor" type="color" value="#D4AF6A"
+            style="width:36px;height:32px;border:1px solid var(--gold-border);border-radius:6px;cursor:pointer;padding:2px" />
+          <span style="font-size:12px;color:var(--text-muted)">Cor dourada do tema</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA: METAS -->
+    <div id="tab-metas" class="cfg-panel" style="display:none">
+      <div class="cfg-section-label">Metas Mensais — Junho 2025</div>
+      <div class="cfg-field">
+        <label>Meta faturamento bruto (R$)</label>
+        <input id="cfg-meta-fat" type="number" value="135000" step="1000" />
+      </div>
+      <div class="cfg-field">
+        <label>Meta lucro líquido (R$)</label>
+        <input id="cfg-meta-lucro" type="number" value="56000" step="1000" />
+      </div>
+      <div class="cfg-field">
+        <label>Meta ticket médio (R$)</label>
+        <input id="cfg-meta-ticket" type="number" value="460" step="10" />
+      </div>
+
+      <div class="cfg-section-label" style="margin-top:18px">Metas por Categoria</div>
+      <div class="cfg-field">
+        <label>Injetáveis (R$)</label>
+        <input id="cfg-meta-inj" type="number" value="40000" step="1000" />
+      </div>
+      <div class="cfg-field">
+        <label>Facial (R$)</label>
+        <input id="cfg-meta-fac" type="number" value="42000" step="1000" />
+      </div>
+      <div class="cfg-field">
+        <label>Corporal (R$)</label>
+        <input id="cfg-meta-corp" type="number" value="45000" step="1000" />
+      </div>
+
+      <div class="cfg-section-label" style="margin-top:18px">Alertas</div>
+      <div class="cfg-field">
+        <label>Alertar se no-show ultrapassar (%)</label>
+        <input id="cfg-alerta-noshow" type="number" value="10" min="1" max="50" />
+      </div>
+      <div class="cfg-field">
+        <label>Alertar se ociosidade ultrapassar (%)</label>
+        <input id="cfg-alerta-ocio" type="number" value="20" min="1" max="80" />
+      </div>
+    </div>
+
+    <!-- ABA: COMISSÕES -->
+    <div id="tab-comissoes" class="cfg-panel" style="display:none">
+      <div class="cfg-section-label">Taxa de Comissão por Profissional</div>
+      <div id="cfg-comissoes-list" style="display:flex;flex-direction:column;gap:10px"></div>
+
+      <div class="cfg-section-label" style="margin-top:18px">Regras Gerais</div>
+      <div class="cfg-field">
+        <label>Taxa padrão para novos profissionais (%)</label>
+        <input id="cfg-taxa-padrao" type="number" value="16" min="1" max="50" step="0.5" />
+      </div>
+      <div class="cfg-field">
+        <label>Comissão sobre pacotes (%)</label>
+        <input id="cfg-taxa-pacotes" type="number" value="12" min="1" max="50" step="0.5" />
+      </div>
+      <div class="cfg-field">
+        <label>Comissão sobre home care (%)</label>
+        <input id="cfg-taxa-homecare" type="number" value="8" min="1" max="50" step="0.5" />
+      </div>
+    </div>
+
+    <!-- ABA: EQUIPE -->
+    <div id="tab-profs" class="cfg-panel" style="display:none">
+      <div class="cfg-section-label">Profissionais Cadastrados</div>
+      <div id="cfg-profs-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      <button class="cfg-add-btn" onclick="addProfissional()">
+        <i data-lucide="plus" style="width:13px;height:13px"></i> Adicionar Profissional
+      </button>
+    </div>
+
+  </div><!-- /cfgContent -->
+
+  <!-- Footer -->
+  <div style="
+    padding:16px 24px; border-top:1px solid var(--gold-border);
+    background:var(--gold-100); display:flex; gap:10px; flex-shrink:0;">
+    <button onclick="applyConfig()" style="
+      flex:1;padding:10px;background:var(--gold-400);color:#fff;
+      border:none;border-radius:var(--radius-sm);font-size:13px;
+      font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
+      transition:background 0.15s;box-shadow:0 2px 8px var(--gold-glow);"
+      onmouseover="this.style.background='var(--gold-600)'" onmouseout="this.style.background='var(--gold-400)'">
+      Aplicar Configurações
+    </button>
+    <button onclick="closeConfig()" style="
+      padding:10px 18px;background:#fff;color:var(--text-secondary);
+      border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+      font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;
+      transition:all 0.15s;"
+      onmouseover="this.style.background='var(--gold-100)'" onmouseout="this.style.background='#fff'">
+      Cancelar
+    </button>
+  </div>
+</aside>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   ANIMATION ENGINE
+══════════════════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ── 1. Scroll progress bar ─────────────────────────────────────── */
+  const scrollBar = document.getElementById('scrollBar');
+  const main      = document.querySelector('.main');
+  main.addEventListener('scroll', () => {
+    const pct = main.scrollTop / (main.scrollHeight - main.clientHeight);
+    scrollBar.style.transform = `scaleX(${Math.min(pct, 1)})`;
+  });
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+    scrollBar.style.transform = `scaleX(${Math.min(pct, 1)})`;
+  });
+
+  /* ── 2. Mouse spotlight ─────────────────────────────────────────── */
+  const spotlight = document.getElementById('mouseSpotlight');
+  let spotX = 0, spotY = 0, spotTX = 0, spotTY = 0;
+  document.addEventListener('mousemove', e => {
+    spotTX = e.clientX; spotTY = e.clientY;
+    spotlight.style.opacity = '1';
+  });
+  (function spotAnim() {
+    spotX += (spotTX - spotX) * 0.06;
+    spotY += (spotTY - spotY) * 0.06;
+    spotlight.style.left = spotX + 'px';
+    spotlight.style.top  = spotY + 'px';
+    requestAnimationFrame(spotAnim);
+  })();
+
+  /* ── 3. Wrap section titles for clip animation ───────────────────── */
+  document.querySelectorAll('.section-title').forEach(el => {
+    el.innerHTML = `<span class="title-text">${el.textContent}</span>`;
+  });
+
+  /* ── 4. Apply reveal + stagger classes to content blocks ─────────── */
+  // KPI grid → stagger
+  document.querySelector('.kpi-grid')?.classList.add('reveal-stagger');
+
+  // Each grid row → stagger
+  document.querySelectorAll('.grid-2, .grid-3, .grid-1-2, .grid-2-1').forEach(g => {
+    g.classList.add('reveal-stagger');
+  });
+
+  // Individual cards not in a grid
+  document.querySelectorAll('.card:not(.kpi-card)').forEach((c, i) => {
+    if (!c.closest('.reveal-stagger')) {
+      c.classList.add('reveal');
+      c.classList.add(i % 2 === 0 ? 'from-left' : 'from-right');
+    }
+  });
+
+  // Section titles
+  document.querySelectorAll('.section-title').forEach(el => {
+    el.classList.add('reveal');
+  });
+
+  /* ── 5. Shimmer on each KPI card ────────────────────────────────── */
+  document.querySelectorAll('.kpi-card').forEach((card, i) => {
+    const shimmer = document.createElement('div');
+    shimmer.className = 'shimmer';
+    shimmer.style.animationDelay = (i * 0.6) + 's';
+    card.appendChild(shimmer);
+    card.classList.add('tilt-card');
+  });
+
+  /* ── 6. Tilt-card 3-D mouse parallax ────────────────────────────── */
+  document.querySelectorAll('.tilt-card, .card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width  / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      card.style.transform = `perspective(800px) rotateY(${dx * 4}deg) rotateX(${-dy * 4}deg) translateY(-3px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform 0.45s cubic-bezier(0.22,1,0.36,1), box-shadow 0.45s ease';
+      card.style.transform  = '';
+      setTimeout(() => card.style.transition = '', 460);
+    });
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = 'transform 0.12s ease, box-shadow 0.12s ease';
+    });
+  });
+
+  /* ── 7. IntersectionObserver for reveal + stagger ───────────────── */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Table row stagger when table enters view
+        if (entry.target.id === 'profTable' || entry.target.closest('#profTable')) return;
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-stagger, .section-title').forEach(el => io.observe(el));
+
+  /* ── 8. Table rows cascade in ───────────────────────────────────── */
+  const tableObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const rows = entry.target.querySelectorAll('tr');
+        rows.forEach((row, i) => {
+          setTimeout(() => row.classList.add('row-visible'), i * 70);
+        });
+        tableObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const table = document.getElementById('profTable');
+  if (table) tableObserver.observe(table);
+
+  /* ── 9. Mark chart wrappers ready after charts render ───────────── */
+  setTimeout(() => {
+    document.querySelectorAll('.chart-wrap').forEach(w => w.classList.add('chart-ready'));
+  }, 500);
+
+  /* ── 10. Nav item hover ripple ──────────────────────────────────── */
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect   = this.getBoundingClientRect();
+      ripple.style.cssText = `
+        position:absolute; border-radius:50%;
+        width:6px; height:6px;
+        background:rgba(198,171,124,0.45);
+        left:${e.clientX - rect.left - 3}px;
+        top:${e.clientY - rect.top - 3}px;
+        transform:scale(0); pointer-events:none;
+        animation:rippleOut 0.5s ease forwards;`;
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 520);
+    });
+  });
+
+  // Ripple keyframe
+  const rippleStyle = document.createElement('style');
+  rippleStyle.textContent = `@keyframes rippleOut { to { transform:scale(28); opacity:0; } }`;
+  document.head.appendChild(rippleStyle);
+
+  /* ── 11. Scroll-triggered number pulse on KPIs ──────────────────── */
+  const kpiObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'none';
+        entry.target.offsetHeight; // reflow
+        entry.target.style.animation = 'kpiPop 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const kpiPopStyle = document.createElement('style');
+  kpiPopStyle.textContent = `@keyframes kpiPop { 0%{transform:scale(0.88)} 100%{transform:scale(1)} }`;
+  document.head.appendChild(kpiPopStyle);
+  document.querySelectorAll('.kpi-value').forEach(el => kpiObserver.observe(el));
+
+  /* ── 12. Sidebar items stagger on load ──────────────────────────── */
+  document.querySelectorAll('.nav-item').forEach((item, i) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateX(-18px)';
+    setTimeout(() => {
+      item.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1), background 0.18s, color 0.18s';
+      item.style.opacity    = '1';
+      item.style.transform  = '';
+    }, 350 + i * 60);
+  });
+
+});
+</script>
+</body>
+</html>
