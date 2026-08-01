@@ -1,6 +1,4 @@
 import React from 'react';
-import { BudgetModalProvider } from './context/BudgetModalContext';
-import BudgetFormModal from './components/BudgetFormModal';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Marquee from './components/Marquee';
@@ -14,22 +12,19 @@ import Footer from './components/Footer';
 
 export default function App() {
   return (
-    <BudgetModalProvider>
-      <div className="min-h-screen bg-ink-900 text-content-mid selection:bg-violet-600 selection:text-white">
-        <Navbar />
-        <main id="conteudo">
-          <Hero />
-          <Marquee />
-          <Benefits />
-          <Services />
-          <Cases />
-          <Process />
-          <Faq />
-          <CtaBanner />
-        </main>
-        <Footer />
-        <BudgetFormModal />
-      </div>
-    </BudgetModalProvider>
+    <div className="min-h-screen bg-ink-900 text-content-mid selection:bg-violet-600 selection:text-white">
+      <Navbar />
+      <main id="conteudo">
+        <Hero />
+        <Marquee />
+        <Benefits />
+        <Services />
+        <Cases />
+        <Process />
+        <Faq />
+        <CtaBanner />
+      </main>
+      <Footer />
+    </div>
   );
 }

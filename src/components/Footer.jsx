@@ -1,6 +1,8 @@
 import React from 'react';
 import { Mail, MapPin } from 'lucide-react';
 import Logo from './ui/Logo';
+import { whatsappLink, EMAIL, WHATSAPP_DISPLAY } from '../data/contact';
+import { WhatsAppIcon } from './ui/primitives';
 
 const nav = [
   { label: 'Soluções', href: '#solucoes' },
@@ -48,11 +50,22 @@ export default function Footer() {
             <ul className="mt-5 flex flex-col gap-3.5">
               <li>
                 <a
-                  href="mailto:lucasvandes7@gmail.com"
+                  href={whatsappLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 text-[15px] text-content-mid transition-colors duration-300 hover:text-content-hi"
+                >
+                  <WhatsAppIcon className="h-4 w-4 shrink-0 text-content-low" />
+                  {WHATSAPP_DISPLAY}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${EMAIL}`}
                   className="inline-flex items-center gap-2.5 text-[15px] text-content-mid transition-colors duration-300 hover:text-content-hi"
                 >
                   <Mail className="h-4 w-4 shrink-0 text-content-low" aria-hidden="true" />
-                  lucasvandes7@gmail.com
+                  {EMAIL}
                 </a>
               </li>
               <li className="inline-flex items-center gap-2.5 text-[15px] text-content-mid">

@@ -1,13 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle } from 'lucide-react';
-import { useBudgetModal } from '../context/BudgetModalContext';
-import { WHATSAPP_NUMBER } from './BudgetFormModal';
-import { PrimaryAction, SecondaryAction } from './ui/primitives';
+import { Mail } from 'lucide-react';
+import { whatsappLink, EMAIL, WHATSAPP_DISPLAY } from '../data/contact';
+import { PrimaryAction, SecondaryAction, WhatsAppIcon } from './ui/primitives';
 
 export default function CtaBanner() {
-  const { openModal } = useBudgetModal();
-
   return (
     <section id="contato" className="px-6 py-24 sm:py-32">
       <motion.div
@@ -38,22 +35,26 @@ export default function CtaBanner() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <PrimaryAction as="button" type="button" onClick={openModal}>
-              Fazer orçamento
-            </PrimaryAction>
-            <SecondaryAction
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Oi! Vim pelo site e quero falar sobre um projeto.')}`}
+            <PrimaryAction
+              href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
             >
               Falar no WhatsApp
-            </SecondaryAction>
+            </PrimaryAction>
+            <SecondaryAction href={`mailto:${EMAIL}`}>Mandar e-mail</SecondaryAction>
           </div>
 
-          <p className="mt-8 flex items-center justify-center gap-2 text-[14px] text-content-low">
-            <MessageCircle className="h-4 w-4 text-violet-500" aria-hidden="true" />
-            Resposta em até um dia útil.
-          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-2.5 text-[14.5px] text-content-low sm:flex-row sm:gap-6">
+            <span className="inline-flex items-center gap-2">
+              <WhatsAppIcon className="h-4 w-4 text-violet-500" />
+              {WHATSAPP_DISPLAY}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Mail className="h-4 w-4 text-violet-500" aria-hidden="true" />
+              {EMAIL}
+            </span>
+          </div>
         </div>
       </motion.div>
     </section>

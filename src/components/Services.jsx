@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Boxes, Layout, Database, BarChart3, Workflow, Plug, Gauge } from 'lucide-react';
 import { SectionHeader, PrimaryAction } from './ui/primitives';
-import { useBudgetModal } from '../context/BudgetModalContext';
+import { whatsappLink } from '../data/contact';
 
 const services = [
   {
@@ -38,8 +38,6 @@ const services = [
 ];
 
 export default function Services() {
-  const { openModal } = useBudgetModal();
-
   return (
     <section id="solucoes" className="border-y border-[var(--line-soft)] bg-ink-850 py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
@@ -76,7 +74,11 @@ export default function Services() {
         </ul>
 
         <div className="mt-12">
-          <PrimaryAction as="button" type="button" onClick={openModal}>
+          <PrimaryAction
+            href={whatsappLink('Oi! Vim pelo site e quero contar o que a minha empresa precisa.')}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Contar o que eu preciso
           </PrimaryAction>
         </div>

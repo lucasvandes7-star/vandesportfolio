@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, MessageCircle } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Logo from './ui/Logo';
-import { useBudgetModal } from '../context/BudgetModalContext';
+import { whatsappLink } from '../data/contact';
+import { WhatsAppIcon } from './ui/primitives';
 import useFocusTrap from '../lib/useFocusTrap';
 
 const links = [
@@ -13,7 +14,6 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { openModal } = useBudgetModal();
   const menuRef = useRef(null);
 
   useFocusTrap(menuRef, open);
@@ -69,17 +69,18 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2">
             {/* Visível em todos os tamanhos: contato é sempre um clique */}
-            <button
-              type="button"
-              onClick={openModal}
-              aria-label="Fazer orçamento"
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Falar no WhatsApp"
               className="group inline-flex items-center gap-2 rounded-pill bg-violet-600 text-[14.5px] font-medium text-white transition-colors duration-300 hover:bg-violet-500 max-sm:h-11 max-sm:w-11 max-sm:justify-center sm:py-2 sm:pl-5 sm:pr-2"
             >
-              <span className="max-sm:sr-only">Fazer orçamento</span>
+              <span className="max-sm:sr-only">Falar no WhatsApp</span>
               <span className="flex items-center justify-center rounded-pill sm:h-7 sm:w-7 sm:bg-white/15">
-                <MessageCircle className="h-[18px] w-[18px] sm:h-3.5 sm:w-3.5" aria-hidden="true" />
+                <WhatsAppIcon className="h-[19px] w-[19px] sm:h-4 sm:w-4" />
               </span>
-            </button>
+            </a>
 
             <button
               type="button"
@@ -119,13 +120,16 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <button
-            type="button"
-            onClick={() => { setOpen(false); openModal(); }}
-            className="mt-8 w-full rounded-pill bg-violet-600 py-4 text-[15px] font-medium text-white"
+          <a
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setOpen(false)}
+            className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-pill bg-violet-600 py-4 text-[15px] font-medium text-white"
           >
-            Fazer orçamento
-          </button>
+            <WhatsAppIcon className="h-[18px] w-[18px]" />
+            Falar no WhatsApp
+          </a>
         </div>
       )}
     </>

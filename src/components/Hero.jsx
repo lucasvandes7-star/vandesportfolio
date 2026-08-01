@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
-import { useBudgetModal } from '../context/BudgetModalContext';
+import { whatsappLink } from '../data/contact';
 import { PrimaryAction, SecondaryAction } from './ui/primitives';
 
 /* Projetos reais exibidos na moldura do hero — todos no ar e abríveis. */
@@ -27,7 +27,6 @@ const showcase = [
 ];
 
 export default function Hero() {
-  const { openModal } = useBudgetModal();
   const [active, setActive] = React.useState(0);
 
   // Alterna a captura exibida na moldura
@@ -86,8 +85,12 @@ export default function Hero() {
             transition={{ duration: 0.7, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="mt-9 flex flex-wrap items-center gap-3"
           >
-            <PrimaryAction as="button" type="button" onClick={openModal}>
-              Fazer orçamento
+            <PrimaryAction
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Falar no WhatsApp
             </PrimaryAction>
             <SecondaryAction href="#projetos">Ver os projetos</SecondaryAction>
           </motion.div>
