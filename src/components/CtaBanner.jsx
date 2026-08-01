@@ -1,53 +1,61 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Mail, ArrowRight } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { useBudgetModal } from '../context/BudgetModalContext';
+import { WHATSAPP_NUMBER } from './BudgetFormModal';
+import { PrimaryAction, SecondaryAction } from './ui/primitives';
 
 export default function CtaBanner() {
   const { openModal } = useBudgetModal();
-  return (
-    <section className="py-32 bg-[#0d0d0d] text-[#EAE3D2] relative border-t border-[#EAE3D2]/15 overflow-hidden">
-      <div className="max-w-5xl mx-auto px-6 relative z-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="cream-card p-10 sm:p-20 rounded-3xl relative overflow-hidden"
-        >
-          <span className="text-xs font-mono uppercase tracking-widest text-[#EAE3D2]/60 mb-6 block">
-            PRONTO PARA TRANSFORMAR SEU NEGÓCIO?
-          </span>
 
-          <h2 className="font-bebas text-5xl sm:text-7xl lg:text-8xl uppercase tracking-tight text-[#EAE3D2] leading-none mb-6 text-stroke-hover cursor-pointer">
-            VAMOS CRIAR SEU PRÓXIMO PROJETO.
+  return (
+    <section id="contato" className="px-6 py-24 sm:py-32">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="relative mx-auto max-w-4xl overflow-hidden rounded-[28px] border border-[var(--line-soft)] bg-ink-800 px-7 py-16 text-center sm:px-14 sm:py-20"
+      >
+        {/* Halo contido dentro do painel */}
+        <div
+          className="pointer-events-none absolute inset-x-0 -top-24 h-64 opacity-70"
+          style={{
+            background:
+              'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(124,58,237,0.30), transparent 70%)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="relative">
+          <h2 className="mx-auto max-w-[20ch] text-[clamp(1.9rem,4.4vw,2.75rem)] leading-[1.08]">
+            Me conta o que a sua empresa precisa.
           </h2>
 
-          <p className="text-xs sm:text-base text-[#EAE3D2]/80 font-sans max-w-xl mx-auto leading-relaxed mb-10">
-            Entre em contato hoje mesmo. Apresentaremos uma proposta comercial sob medida para digitalizar seus processos e aumentar seu faturamento.
+          <p className="mx-auto mt-5 max-w-[56ch] text-[16.5px] leading-[1.65] text-content-mid">
+            Você explica a situação, eu digo o que dá para fazer, em quanto tempo e por quanto.
+            Se não fizer sentido contratar agora, eu falo isso também.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={openModal}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#EAE3D2] text-[#121212] font-mono text-xs font-bold uppercase tracking-widest hover:bg-white transition-all duration-300 shadow-xl flex items-center justify-center gap-3 group"
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <PrimaryAction as="button" type="button" onClick={openModal}>
+              Fazer orçamento
+            </PrimaryAction>
+            <SecondaryAction
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Oi! Vim pelo site e quero falar sobre um projeto.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>Chamar no WhatsApp</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <a
-              href="mailto:corretor.edsonlunkes@gmail.com"
-              className="w-full sm:w-auto px-8 py-4 rounded-full border border-[#EAE3D2]/40 text-[#EAE3D2] font-mono text-xs font-semibold uppercase tracking-widest hover:border-[#EAE3D2] hover:bg-[#EAE3D2]/10 transition-all duration-300 flex items-center justify-center gap-3"
-            >
-              <Mail className="w-4 h-4" />
-              <span>Enviar E-mail</span>
-            </a>
+              Falar no WhatsApp
+            </SecondaryAction>
           </div>
-        </motion.div>
-      </div>
+
+          <p className="mt-8 flex items-center justify-center gap-2 text-[14px] text-content-low">
+            <MessageCircle className="h-4 w-4 text-violet-500" aria-hidden="true" />
+            Resposta em até um dia útil.
+          </p>
+        </div>
+      </motion.div>
     </section>
   );
 }

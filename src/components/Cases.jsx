@@ -1,26 +1,27 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Globe2, LayoutDashboard, Workflow } from 'lucide-react';
+import { ArrowUpRight, FolderGit2, Globe2, LayoutDashboard, Workflow } from 'lucide-react';
 import { projectsData, automationData } from '../data/projects';
+import { SectionHeader } from './ui/primitives';
 
 const groups = [
   {
     key: 'site',
     title: 'Sites',
     icon: Globe2,
-    description: 'Sites institucionais, landing pages e web apps desenvolvidos sob medida.',
+    description: 'Sites institucionais, landing pages e web apps. Todos no ar — clique para abrir.',
   },
   {
     key: 'crm',
-    title: 'CRMs & Dashboards',
+    title: 'CRMs e dashboards',
     icon: LayoutDashboard,
-    description: 'Sistemas de gestão, painéis analíticos e ferramentas internas sob medida.',
+    description: 'Sistemas de gestão e painéis analíticos feitos sob medida para a operação do cliente.',
   },
   {
     key: 'automacao',
     title: 'Automações',
     icon: Workflow,
-    description: 'Fluxos automatizados de processos, atendimento e integrações entre sistemas.',
+    description: 'Fluxos que tiram a tarefa repetitiva da mão de alguém.',
   },
 ];
 
@@ -30,43 +31,39 @@ function ProjectCard({ project }) {
       href={project.link}
       target={project.external ? '_blank' : undefined}
       rel={project.external ? 'noopener noreferrer' : undefined}
-      className="cream-card group flex flex-col rounded-2xl overflow-hidden"
+      className="surface group flex h-full flex-col overflow-hidden rounded-card"
     >
-      <div className="relative aspect-video overflow-hidden bg-[#0d0d0d]">
+      <div className="relative aspect-[16/10] overflow-hidden bg-ink-900">
         {project.image && (
           <img
             src={project.image}
-            alt={project.title}
+            alt={`Captura do projeto ${project.title}`}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover object-top transition-transform duration-700 ease-spring group-hover:scale-[1.04]"
           />
         )}
-        <div className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#121212]/80 border border-[#EAE3D2]/20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <ArrowUpRight className="h-4 w-4 text-[#EAE3D2]" />
-        </div>
+        <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-pill border border-[var(--line-soft)] bg-ink-900/80 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+          <ArrowUpRight className="h-4 w-4 text-content-hi" aria-hidden="true" />
+        </span>
       </div>
-      <div className="flex flex-col gap-3 p-6">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#EAE3D2]/50">
-            {project.sector}
-          </span>
-        </div>
-        <h3 className="font-bebas text-2xl uppercase tracking-tight text-[#EAE3D2]">
+
+      <div className="flex flex-1 flex-col p-6">
+        <span className="kicker">{project.sector}</span>
+        <h4 className="mt-2.5 text-[17px] font-semibold leading-snug text-content-hi">
           {project.title}
-        </h3>
-        <p className="text-sm text-[#EAE3D2]/70 leading-relaxed">
-          {project.description}
-        </p>
-        <div className="flex flex-wrap gap-2 pt-2">
+        </h4>
+        <p className="mt-2.5 text-[14.5px] leading-[1.6] text-content-mid">{project.description}</p>
+
+        <ul className="mt-5 flex flex-wrap gap-1.5 pt-1">
           {project.tech.map((t) => (
-            <span
+            <li
               key={t}
-              className="text-[10px] font-mono uppercase tracking-wide text-[#EAE3D2]/60 border border-[#EAE3D2]/15 rounded-full px-2.5 py-1"
+              className="rounded-pill border border-[var(--line-soft)] px-2.5 py-1 text-[11.5px] text-content-low"
             >
               {t}
-            </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </a>
   );
@@ -74,60 +71,65 @@ function ProjectCard({ project }) {
 
 export default function Cases() {
   return (
-    <section id="cases" className="py-32 bg-[#121212] text-[#EAE3D2] relative">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="projetos" className="py-24 sm:py-32">
+      <div className="mx-auto max-w-6xl px-6">
+        <SectionHeader
+          badge="Projetos"
+          badgeIcon={FolderGit2}
+          title={<>Trabalho entregue, no ar, aberto para você conferir.</>}
+        >
+          Nada de case fictício ou mockup de projeto que não existe. Cada item abaixo é um
+          trabalho real — clique e veja funcionando.
+        </SectionHeader>
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-20 border-b border-[#EAE3D2]/15 pb-8">
-          <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-[#EAE3D2]/60">PORTFÓLIO DE TRABALHOS</span>
-            <h2 className="font-bebas text-5xl sm:text-7xl uppercase tracking-tight text-[#EAE3D2] mt-2 text-stroke-hover cursor-pointer">
-              CASES SELECIONADOS.
-            </h2>
-          </div>
-          <p className="text-sm text-[#EAE3D2]/70 max-w-md font-sans">
-            Navegue pelos projetos reais desenvolvidos para nossos clientes. Clique para acessar o site ou dashboard ao vivo.
-          </p>
-        </div>
-
-        {/* Groups */}
-        <div className="flex flex-col gap-24">
+        <div className="mt-14 flex flex-col gap-14">
           {groups.map((group) => {
-            const items = group.key === 'automacao'
-              ? automationData
-              : projectsData.filter((p) => p.category === group.key);
-
+            const items =
+              group.key === 'automacao'
+                ? automationData
+                : projectsData.filter((p) => p.category === group.key);
             const Icon = group.icon;
 
             return (
               <div key={group.key}>
-                <div className="flex items-center gap-3 mb-2">
-                  <Icon className="h-5 w-5 text-[#EAE3D2]/70" />
-                  <h3 className="font-bebas text-3xl sm:text-4xl uppercase tracking-tight text-[#EAE3D2]">
-                    {group.title}
-                  </h3>
+                <div className="mb-6 border-b border-[var(--line-soft)] pb-4">
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="h-[18px] w-[18px] text-violet-400" aria-hidden="true" />
+                    <h3 className="text-2xl font-semibold">{group.title}</h3>
+                    {items.length > 0 && (
+                      <span className="ml-1 rounded-pill border border-[var(--line-soft)] px-2.5 py-0.5 text-[12px] text-content-low">
+                        {items.length}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2.5 max-w-[62ch] text-[15px] leading-[1.6] text-content-mid">
+                    {group.description}
+                  </p>
                 </div>
-                <p className="text-sm text-[#EAE3D2]/60 mb-10 max-w-xl">
-                  {group.description}
-                </p>
 
                 {items.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {items.map((project, i) => (
-                      <motion.div
+                      <motion.li
                         key={project.id}
-                        initial={{ opacity: 0, y: 24 }}
+                        initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: '-80px' }}
-                        transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
+                        viewport={{ once: true, margin: '-60px' }}
+                        transition={{ duration: 0.55, delay: (i % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
                       >
                         <ProjectCard project={project} />
-                      </motion.div>
+                      </motion.li>
                     ))}
-                  </div>
+                  </ul>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-[#EAE3D2]/15 p-10 text-center text-sm text-[#EAE3D2]/50">
-                    Em breve: cases de automação.
+                  <div className="rounded-card border border-dashed border-[var(--line-mid)] bg-white/[0.015] px-8 py-12 text-center">
+                    <p className="text-[15px] text-content-mid">
+                      As automações que eu construo rodam dentro da operação de cada cliente, então
+                      não dá para abrir um link público.
+                    </p>
+                    <p className="mt-2 text-[14.5px] text-content-low">
+                      Em breve: exemplos dos fluxos, sem identificar as empresas.
+                    </p>
                   </div>
                 )}
               </div>

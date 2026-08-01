@@ -1,27 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, ArrowRight } from 'lucide-react';
 import { useBudgetModal } from '../context/BudgetModalContext';
+import useFocusTrap from '../lib/useFocusTrap';
 
-const WHATSAPP_NUMBER = '5551984114248';
+export const WHATSAPP_NUMBER = '5551984114248';
 
 export default function BudgetFormModal() {
   const { isOpen, closeModal } = useBudgetModal();
   const [name, setName] = useState('');
   const [need, setNeed] = useState('');
+  const dialogRef = useRef(null);
+  const firstFieldRef = useRef(null);
+
+  // O contexto devolve o foco ao gatilho; aqui só prendemos o Tab
+  useFocusTrap(dialogRef, isOpen, { restoreFocus: false });
+
+  // Fecha com Escape e trava o scroll de fundo
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') closeModal(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    firstFieldRef.current?.focus();
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, closeModal]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const message = `Olá! Meu nome é ${name}. Gostaria de solicitar um orçamento.\n\nNecessidade: ${need}`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-
     window.open(url, '_blank', 'noopener,noreferrer');
-
     setName('');
     setNeed('');
     closeModal();
   };
+
+  const fieldClass =
+    'w-full rounded-[14px] border border-[var(--line-soft)] bg-ink-900 px-4 py-3 text-[15px] text-content-hi placeholder:text-content-low transition-colors duration-300 focus:border-violet-500 focus:outline-none';
 
   return (
     <AnimatePresence>
@@ -30,50 +49,58 @@ export default function BudgetFormModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
           onClick={closeModal}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-orcamento"
+            initial={{ opacity: 0, scale: 0.97, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0, scale: 0.97, y: 12 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#121212] border border-[#EAE3D2]/20 rounded-3xl p-8 sm:p-10 relative shadow-2xl"
+            className="relative w-full max-w-md rounded-[24px] border border-[var(--line-soft)] bg-ink-800 p-7 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9)] sm:p-9"
           >
             <button
+              type="button"
               onClick={closeModal}
               aria-label="Fechar"
-              className="absolute top-5 right-5 text-[#EAE3D2]/60 hover:text-[#EAE3D2] transition-colors"
+              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-pill text-content-low transition-colors duration-300 hover:bg-white/[0.06] hover:text-content-hi"
             >
-              <X className="w-5 h-5" />
+              <X className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
 
-            <span className="text-xs font-mono uppercase tracking-widest text-[#EAE3D2]/60 mb-3 block">
-              Solicitar Orçamento
-            </span>
-            <h3 className="font-bebas text-3xl sm:text-4xl uppercase tracking-tight text-[#EAE3D2] mb-6">
-              Conte um pouco sobre o seu projeto
-            </h3>
+            <span className="kicker">Orçamento</span>
+            <h2 id="titulo-orcamento" className="mt-3 text-[26px] leading-tight">
+              Me conta sobre o seu projeto
+            </h2>
+            <p className="mt-3 text-[15px] leading-[1.6] text-content-mid">
+              Duas informações e eu já consigo te responder com algo útil.
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-4">
               <div>
-                <label htmlFor="name" className="block text-[11px] font-mono uppercase tracking-widest text-[#EAE3D2]/70 mb-2">
+                <label htmlFor="name" className="mb-2 block text-[13.5px] font-medium text-content-hi">
                   Seu nome
                 </label>
                 <input
+                  ref={firstFieldRef}
                   id="name"
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Como podemos te chamar?"
-                  className="w-full px-4 py-3 rounded-xl bg-[#0d0d0d] border border-[#EAE3D2]/20 text-[#EAE3D2] placeholder:text-[#EAE3D2]/30 text-sm focus:outline-none focus:border-[#EAE3D2]/60 transition-colors"
+                  placeholder="Como posso te chamar?"
+                  className={fieldClass}
                 />
               </div>
 
               <div>
-                <label htmlFor="need" className="block text-[11px] font-mono uppercase tracking-widest text-[#EAE3D2]/70 mb-2">
+                <label htmlFor="need" className="mb-2 block text-[13.5px] font-medium text-content-hi">
                   O que você precisa?
                 </label>
                 <textarea
@@ -82,17 +109,20 @@ export default function BudgetFormModal() {
                   rows={4}
                   value={need}
                   onChange={(e) => setNeed(e.target.value)}
-                  placeholder="Ex: preciso de um site institucional, um CRM para minha equipe de vendas..."
-                  className="w-full px-4 py-3 rounded-xl bg-[#0d0d0d] border border-[#EAE3D2]/20 text-[#EAE3D2] placeholder:text-[#EAE3D2]/30 text-sm focus:outline-none focus:border-[#EAE3D2]/60 transition-colors resize-none"
+                  placeholder="Ex: um site para minha clínica, um CRM para a equipe de vendas, automatizar o envio de lembretes…"
+                  className={`${fieldClass} resize-none`}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full px-8 py-3.5 rounded-full bg-[#EAE3D2] text-[#121212] font-bold text-xs uppercase tracking-widest hover:bg-white transition-all duration-300 shadow-xl flex items-center justify-center gap-2 group"
+                className="group mt-1 flex w-full items-center justify-center gap-2.5 rounded-pill bg-violet-600 py-3.5 text-[15px] font-medium text-white transition-colors duration-300 hover:bg-violet-500"
               >
-                <span>Enviar para o WhatsApp</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span>Enviar pelo WhatsApp</span>
+                <ArrowRight
+                  className="h-4 w-4 transition-transform duration-400 ease-spring group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
               </button>
             </form>
           </motion.div>

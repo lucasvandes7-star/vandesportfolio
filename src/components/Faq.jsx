@@ -1,77 +1,97 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, HelpCircle } from 'lucide-react';
+import { SectionHeader } from './ui/primitives';
+
+const faqs = [
+  {
+    q: 'Qual é o prazo de entrega?',
+    a: 'Landing page e site institucional: de 7 a 14 dias úteis. CRM, dashboard e aplicações mais complexas: de 15 a 30 dias úteis. O prazo fecha junto com o escopo, por escrito, antes de começar.',
+  },
+  {
+    q: 'Preciso pagar mensalidade?',
+    a: 'Não pelo desenvolvimento. O código e o sistema ficam sendo da sua empresa, e não cobro por usuário. O que existe de custo recorrente é o que você já pagaria de qualquer forma: domínio e, dependendo do projeto, hospedagem. Manutenção contínua é opcional e combinada à parte.',
+  },
+  {
+    q: 'Onde o site fica hospedado?',
+    a: 'Normalmente na Vercel, que dá carregamento rápido, certificado SSL e boa estabilidade sem custo alto. Se a sua empresa já tem uma hospedagem ou precisa de outra por política interna, dá para adaptar.',
+  },
+  {
+    q: 'Funciona bem no celular?',
+    a: 'Sim, e é onde eu testo primeiro. A maior parte do acesso vem de telefone, então o projeto é construído mobile-first e testado em aparelho real antes de ir ao ar — não só no simulador do navegador.',
+  },
+  {
+    q: 'E se eu já tiver um site?',
+    a: 'Dá para partir do que existe. Às vezes o certo é refazer, às vezes é só corrigir performance e estrutura. Eu olho o que você tem hoje e digo qual dos dois faz sentido — inclusive quando a resposta é que não vale a pena mexer.',
+  },
+  {
+    q: 'Como funciona a automação?',
+    a: 'Primeiro eu mapeio a tarefa repetitiva que consome tempo da equipe: envio de mensagem, lembrete, relatório, atualização de cadastro. Depois construo o fluxo que faz isso sozinho e conecto às ferramentas que você já usa. O que roda em cada cliente é específico da operação dele.',
+  },
+];
 
 export default function Faq() {
-  const [openIndex, setOpenIndex] = useState(null);
-
-  const faqs = [
-    {
-      q: 'Qual é o prazo médio de entrega de um site ou CRM?',
-      a: 'Para Landing Pages e sites institucionais, o prazo médio é de 7 a 14 dias úteis. Para sistemas CRM e ecossistemas web complexos, o desenvolvimento leva entre 15 a 30 dias úteis.'
-    },
-    {
-      q: 'O site fica hospedado na Vercel?',
-      a: 'Sim! Utilizamos a infraestrutura global da Vercel para garantir tempo de carregamento ultrarrápido, certificado SSL gratuito e altíssima estabilidade sem custos desnecessários.'
-    },
-    {
-      q: 'Preciso pagar mensalidade pelo CRM ou site?',
-      a: 'Não cobramos mensalidades recorrentes pelo desenvolvimento. O código e o sistema pertencem 100% à sua empresa. Caso deseje manutenção contínua, oferecemos como opcional.'
-    },
-    {
-      q: 'O site será otimizado para celulares e tablets?',
-      a: 'Absolutamente. Todos os nossos projetos são desenvolvidos com metodologia Mobile-First. Garantimos fluidez perfeita em smartphones, tablets e monitores 4K.'
-    }
-  ];
+  const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section id="faq" className="py-32 bg-[#121212] text-[#EAE3D2] relative">
-      <div className="max-w-4xl mx-auto px-6">
-        
-        {/* Header */}
-        <div className="text-center mb-20">
-          <span className="text-xs font-mono uppercase tracking-widest text-[#EAE3D2]/60">DÚVIDAS FREQUENTES</span>
-          <h2 className="font-bebas text-5xl sm:text-7xl uppercase tracking-tight text-[#EAE3D2] mt-2 text-stroke-hover cursor-pointer">
-            PERGUNTAS & RESPOSTAS.
-          </h2>
-          <p className="mt-3 text-sm text-[#EAE3D2]/70 font-sans max-w-md mx-auto">
-            Tudo o que você precisa saber antes de iniciar o seu projeto conosco.
-          </p>
-        </div>
+    <section id="faq" className="py-24 sm:py-32">
+      <div className="mx-auto max-w-3xl px-6">
+        <SectionHeader
+          badge="Dúvidas"
+          badgeIcon={HelpCircle}
+          title={<>Perguntas que aparecem em toda primeira conversa.</>}
+          align="center"
+        />
 
-        <div className="space-y-4">
+        <ul className="mt-14 flex flex-col gap-3">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
-            return (
-              <div
-                key={index}
-                className="cream-card rounded-2xl overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full p-6 sm:p-8 text-left flex items-center justify-between gap-4 font-bebas text-2xl tracking-wide text-[#EAE3D2] hover:text-outline-cream transition-all"
-                >
-                  <span>{faq.q}</span>
-                  <ChevronDown className={`w-5 h-5 text-[#EAE3D2] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-                </button>
+            const panelId = `faq-panel-${index}`;
+            const buttonId = `faq-button-${index}`;
 
-                <AnimatePresence>
+            return (
+              <li key={faq.q} className="surface overflow-hidden rounded-card">
+                <h3>
+                  <button
+                    id={buttonId}
+                    type="button"
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    className="flex w-full items-center justify-between gap-5 px-6 py-5 text-left sm:px-7"
+                  >
+                    <span className="text-[16px] font-semibold text-content-hi">{faq.q}</span>
+                    <ChevronDown
+                      className={`h-[18px] w-[18px] shrink-0 text-content-low transition-transform duration-400 ease-spring ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </h3>
+
+                <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={panelId}
+                      role="region"
+                      aria-labelledby={buttonId}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="px-6 sm:px-8 pb-6 text-[#EAE3D2]/80 text-xs sm:text-sm font-sans leading-relaxed border-t border-[#EAE3D2]/15 pt-4"
+                      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
                     >
-                      {faq.a}
+                      <p className="px-6 pb-6 text-[15px] leading-[1.65] text-content-mid sm:px-7">
+                        {faq.a}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
     </section>
   );

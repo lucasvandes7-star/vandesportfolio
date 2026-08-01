@@ -2,70 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --ink-900: #050507;
+  --ink-850: #08080c;
+  --ink-800: #0d0d13;
+  --ink-700: #14141c;
+
+  --line-soft: rgba(255, 255, 255, 0.07);
+  --line-mid: rgba(255, 255, 255, 0.12);
+
+  --text-hi: #f4f6fa;
+  --text-mid: #a8b0bf;
+  --text-low: #7d8595;
+
+  --violet-600: #7c3aed;
+  --violet-500: #8b5cf6;
+  --violet-400: #a855f7;
+  --violet-300: #c4b5fd;
+}
+
 @layer base {
   body {
-    background-color: #121212;
-    color: #EAE3D2;
-    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--ink-900);
+    color: var(--text-mid);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Outfit', system-ui, sans-serif;
+    color: var(--text-hi);
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+
+  /* Foco visível para navegação por teclado */
+  :focus-visible {
+    outline: 2px solid var(--violet-500);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 }
 
-/* shadcn-style semantic tokens (used by components in src/components/ui) */
-:root {
-  --background: 0 0% 7%;
-  --foreground: 45 33% 87%;
-  --border: 45 33% 87%;
-  --muted: 45 33% 20%;
-  --primary: 238 84% 67%;
+@layer components {
+  /* Superfície padrão de card */
+  .surface {
+    background-color: var(--ink-800);
+    border: 1px solid var(--line-soft);
+    transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .surface:hover {
+    border-color: var(--line-mid);
+    background-color: var(--ink-700);
+  }
+
+  /* Rótulo técnico do badge de seção */
+  .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-mid);
+  }
 }
 
-/* Color Palette from Reference Hero */
-:root {
-  --ref-bg: #121212;
-  --ref-surface: #0d0d0d;
-  --ref-card: #181818;
-  --ref-text: #EAE3D2;
-  --ref-text-muted: rgba(234, 227, 210, 0.7);
-  --ref-border: rgba(234, 227, 210, 0.15);
+/* Halo roxo de fundo — usado uma vez, atrás do hero */
+.violet-halo {
+  background: radial-gradient(
+    ellipse 80% 55% at 50% 0%,
+    rgba(124, 58, 237, 0.18) 0%,
+    rgba(124, 58, 237, 0.05) 40%,
+    transparent 70%
+  );
 }
 
-/* Text Outline Default -> Solid Color on Hover */
-.hover-letter {
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(234, 227, 210, 0.8);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: default;
+/* Máscara de fade nas bordas do marquee */
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
 
-.hover-letter:hover {
-  color: #EAE3D2;
-  -webkit-text-stroke: 0px transparent;
-}
-
-/* Editorial Glass & Border Panel */
-.cream-card {
-  background-color: #161616;
-  border: 1px solid rgba(234, 227, 210, 0.12);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.cream-card:hover {
-  border-color: rgba(234, 227, 210, 0.4);
-  box-shadow: 0 12px 40px -10px rgba(234, 227, 210, 0.12);
-  transform: translateY(-4px);
-}
-
-/* Custom Scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #121212;
+  background: var(--ink-900);
 }
 ::-webkit-scrollbar-thumb {
-  background: #262626;
-  border-radius: 4px;
+  background: #232330;
+  border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #EAE3D2;
+  background: var(--violet-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

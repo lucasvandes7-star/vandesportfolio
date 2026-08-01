@@ -7,7 +7,7 @@ export const projectsData = [
     sector: 'Saúde & Odontologia',
     tag: 'Landing Page de Alta Conversão',
     description: 'Clínica odontológica de alto padrão. Estrutura focada no agendamento rápido via WhatsApp, seções de provas sociais e tratamentos detalhados.',
-    tech: ['HTML5', 'CSS3', 'JS', 'WhatsApp Lead Flow'],
+    tech: ['HTML5', 'CSS3', 'JS', 'WhatsApp'],
     image: '/covers/sorriso-fiel.png',
     link: '/sorriso-fiel.html',
     external: false
@@ -31,7 +31,7 @@ export const projectsData = [
     sector: 'Advocacia & Direito',
     tag: 'Portal Corporativo',
     description: 'Presença digital sóbria e elegante para escritório jurídico. Foco na transmissão de autoridade, áreas de atuação e contato direto.',
-    tech: ['HTML5', 'CSS Custom', 'JS'],
+    tech: ['HTML5', 'CSS', 'JS'],
     image: '/covers/castilhos-associados.webp',
     link: '/castilhos-associados.html',
     external: false
@@ -43,7 +43,7 @@ export const projectsData = [
     sector: 'Educação & Robótica',
     tag: 'Portal Educacional',
     description: 'Site para escola de tecnologia infantil e robótica. Design lúdico, dinâmico e focado em captação de novas matrículas.',
-    tech: ['HTML5', 'CSS3', 'JavaScript', 'Animações SVG'],
+    tech: ['HTML5', 'CSS3', 'JavaScript', 'SVG'],
     image: '/covers/meu-site.png',
     link: '/meu-site/',
     external: false
@@ -55,7 +55,7 @@ export const projectsData = [
     sector: 'Moda & E-commerce',
     tag: 'Loja Virtual Premium',
     description: 'Vitrine digital para marca de moda feminina premium, com catálogo de coleções e experiência de compra elegante.',
-    tech: ['React', 'Tailwind CSS', 'E-commerce UI'],
+    tech: ['React', 'Tailwind CSS'],
     image: '/covers/istore.png',
     link: 'https://istore-three.vercel.app',
     external: true
@@ -91,7 +91,7 @@ export const projectsData = [
     sector: 'Serviços & Pet',
     tag: 'Landing Page Comercial',
     description: 'Landing page para pet shop premium com agendamento online de banho e tosa, táxi dog e atendimento veterinário.',
-    tech: ['HTML5', 'Tailwind', 'WhatsApp Integration'],
+    tech: ['HTML5', 'Tailwind', 'WhatsApp'],
     image: '/covers/pet-vida.png',
     link: 'https://pet-vida-zeta.vercel.app',
     external: true
@@ -127,7 +127,7 @@ export const projectsData = [
     sector: 'SaaS & Gestão',
     tag: 'CRM & Funil Kanban',
     description: 'Sistema completo para escritórios de contabilidade com gestão de leads, tarefas em Kanban, fluxo financeiro e controle de obrigações.',
-    tech: ['HTML5', 'CSS3', 'JS', 'Kanban Board', 'Interactive CRUD'],
+    tech: ['HTML5', 'CSS3', 'JS'],
     image: '/covers/veritas-crm.png',
     link: 'https://veritas-crm-five.vercel.app',
     external: true
@@ -139,7 +139,7 @@ export const projectsData = [
     sector: 'Business Intelligence',
     tag: 'Painel Analytics Interativo',
     description: 'Dashboard financeiro com gráficos dinâmicos de faturamento, ticket médio, gestão de comissões e acompanhamento de metas.',
-    tech: ['HTML5', 'Chart.js', 'CSS Grid', 'KPIs Animados'],
+    tech: ['HTML5', 'Chart.js', 'CSS'],
     image: '/covers/dashboards.png',
     link: '/dashboards/clinica-estetica.html',
     external: false

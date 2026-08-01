@@ -1,27 +1,74 @@
 import React from 'react';
+import { Mail, MapPin } from 'lucide-react';
+import Logo from './ui/Logo';
+
+const nav = [
+  { label: 'Soluções', href: '#solucoes' },
+  { label: 'Projetos', href: '#projetos' },
+  { label: 'Processo', href: '#processo' },
+  { label: 'FAQ', href: '#faq' },
+];
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-[#121212] text-[#EAE3D2] border-t border-[#EAE3D2]/15 py-12">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs uppercase tracking-widest text-[#EAE3D2]/70">
-        
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full border border-[#EAE3D2]/30 flex items-center justify-center font-bebas text-base text-[#EAE3D2]">
-            LV
+    <footer className="border-t border-[var(--line-soft)] bg-ink-850">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
+          {/* Marca */}
+          <div>
+            <Logo />
+            <p className="mt-5 max-w-[42ch] text-[15px] leading-[1.65] text-content-mid">
+              Sites, CRMs e automações sob medida para pequenas e médias empresas. Feitos por
+              quem você fala direto.
+            </p>
           </div>
-          <span className="font-bebas text-lg tracking-wider text-[#EAE3D2]">
-            LUCAS VANDES STUDIO
-          </span>
+
+          {/* Navegação */}
+          <nav aria-label="Rodapé">
+            <h2 className="kicker">Navegação</h2>
+            <ul className="mt-5 flex flex-col gap-3">
+              {nav.map((l) => (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    className="text-[15px] text-content-mid transition-colors duration-300 hover:text-content-hi"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Contato */}
+          <div>
+            <h2 className="kicker">Contato</h2>
+            <ul className="mt-5 flex flex-col gap-3.5">
+              <li>
+                <a
+                  href="mailto:lucasvandes7@gmail.com"
+                  className="inline-flex items-center gap-2.5 text-[15px] text-content-mid transition-colors duration-300 hover:text-content-hi"
+                >
+                  <Mail className="h-4 w-4 shrink-0 text-content-low" aria-hidden="true" />
+                  lucasvandes7@gmail.com
+                </a>
+              </li>
+              <li className="inline-flex items-center gap-2.5 text-[15px] text-content-mid">
+                <MapPin className="h-4 w-4 shrink-0 text-content-low" aria-hidden="true" />
+                Atendimento remoto — Brasil
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <div className="text-center text-[11px] text-[#EAE3D2]/50">
-          © 2026 LUCAS VANDES · ENGENHARIA WEB & CRMS. TODOS OS DIREITOS RESERVADOS.
+        <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-[var(--line-soft)] pt-7 sm:flex-row sm:items-center">
+          <p className="text-[13.5px] text-content-low">
+            © {year} vandrix.site — Lucas Vandes. Todos os direitos reservados.
+          </p>
+          <p className="text-[13.5px] text-content-low">vandesportfolio.com.br</p>
         </div>
-
-        <div className="text-[11px] text-[#EAE3D2]/70 font-semibold">
-          WWW.VANDESPORTFOLIO.COM.BR
-        </div>
-
       </div>
     </footer>
   );
