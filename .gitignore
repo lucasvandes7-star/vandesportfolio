@@ -1,2 +1,15 @@
 .vercel
 .env*
+
+# Dependências
+node_modules/
+
+# Build
+dist/
+
+# Ferramentas / temporários
+.playwright-mcp/
+*.log
+
+# Artefato temporário do script de extração (imagens base64)
+extracted_projects.json

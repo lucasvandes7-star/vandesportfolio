@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #121212;
+    color: #EAE3D2;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* shadcn-style semantic tokens (used by components in src/components/ui) */
+:root {
+  --background: 0 0% 7%;
+  --foreground: 45 33% 87%;
+  --border: 45 33% 87%;
+  --muted: 45 33% 20%;
+  --primary: 238 84% 67%;
+}
+
+/* Color Palette from Reference Hero */
+:root {
+  --ref-bg: #121212;
+  --ref-surface: #0d0d0d;
+  --ref-card: #181818;
+  --ref-text: #EAE3D2;
+  --ref-text-muted: rgba(234, 227, 210, 0.7);
+  --ref-border: rgba(234, 227, 210, 0.15);
+}
+
+/* Text Outline Default -> Solid Color on Hover */
+.hover-letter {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(234, 227, 210, 0.8);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.hover-letter:hover {
+  color: #EAE3D2;
+  -webkit-text-stroke: 0px transparent;
+}
+
+/* Editorial Glass & Border Panel */
+.cream-card {
+  background-color: #161616;
+  border: 1px solid rgba(234, 227, 210, 0.12);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cream-card:hover {
+  border-color: rgba(234, 227, 210, 0.4);
+  box-shadow: 0 12px 40px -10px rgba(234, 227, 210, 0.12);
+  transform: translateY(-4px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #121212;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #EAE3D2;
+}

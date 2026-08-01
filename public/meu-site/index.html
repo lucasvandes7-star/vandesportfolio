@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROBOLAB — Curso de Robótica</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --cyan: #00d4ff;
+      --purple: #7b2fff;
+      --bg: #050507;
+      --bg2: #0c0c12;
+      --text: #ffffff;
+      --muted: #555566;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    #canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; opacity: 0.35;
+    }
+
+    /* ─── CURSOR ─── */
+    .cursor {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--cyan); position: fixed;
+      pointer-events: none; z-index: 9999;
+      transition: transform 0.15s, opacity 0.3s;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1px solid rgba(0,212,255,0.6); position: fixed;
+      pointer-events: none; z-index: 9998;
+      transition: width 0.35s cubic-bezier(.23,1,.32,1),
+                  height 0.35s cubic-bezier(.23,1,.32,1),
+                  border-color 0.3s;
+    }
+    .cursor.active { transform: scale(0); }
+    .cursor-ring.active { width: 64px; height: 64px; border-color: rgba(0,212,255,0.3); }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100; display: flex;
+      justify-content: space-between; align-items: center;
+      padding: 2rem 4rem;
+    }
+    nav::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(5,5,7,0.95), transparent);
+      pointer-events: none;
+    }
+    .nav-logo {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.3em; color: var(--cyan);
+      text-decoration: none; position: relative;
+    }
+    .nav-links { display: flex; gap: 3rem; list-style: none; position: relative; }
+    .nav-links a {
+      color: rgba(255,255,255,0.45); text-decoration: none;
+      font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
+      transition: color 0.3s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 1px; background: var(--cyan);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      position: relative; background: transparent;
+      border: 1px solid rgba(0,212,255,0.4); color: var(--cyan);
+      padding: 0.6rem 1.5rem; font-size: 0.75rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s; text-decoration: none;
+      overflow: hidden;
+    }
+    .nav-cta::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--cyan); transform: translateY(101%);
+      transition: transform 0.3s ease;
+    }
+    .nav-cta span { position: relative; }
+    .nav-cta:hover { color: #000; }
+    .nav-cta:hover::before { transform: translateY(0); }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative; height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; z-index: 1; overflow: hidden;
+    }
+    .hero-eyebrow {
+      font-size: 0.7rem; letter-spacing: 0.4em;
+      text-transform: uppercase; color: var(--cyan);
+      margin-bottom: 2rem; opacity: 0;
+      animation: fadeUp 1s 0.3s forwards;
+    }
+    .hero-title {
+      font-size: clamp(5rem, 14vw, 14rem); font-weight: 900;
+      line-height: 0.9; letter-spacing: -0.03em; text-transform: uppercase;
+      position: relative; opacity: 0;
+      animation: fadeUp 1.2s 0.1s forwards;
+    }
+    .hero-title .line1 { display: block; color: #fff; }
+    .hero-title .line2 {
+      display: block; color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.25);
+    }
+
+    /* split-letter animation */
+    .split-word { overflow: hidden; display: inline-block; }
+    .split-char {
+      display: inline-block;
+      animation: charReveal 0.7s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes charReveal {
+      from { transform: translateY(110%) rotate(4deg); opacity: 0; }
+      to   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    }
+
+    .glitch { position: relative; display: inline-block; }
+    .glitch::before, .glitch::after {
+      content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%;
+    }
+    .glitch::before {
+      color: var(--cyan); animation: glitch1 4s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    }
+    .glitch::after {
+      color: var(--purple); animation: glitch2 4s infinite;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    }
+    @keyframes glitch1 {
+      0%,88%,100% { transform: translate(0); opacity: 0; }
+      89% { transform: translate(-4px, 1px); opacity: 1; }
+      91% { transform: translate(4px, -1px); opacity: 1; }
+      93% { transform: translate(-2px); opacity: 1; }
+      95% { transform: translate(0); opacity: 0; }
+    }
+    @keyframes glitch2 {
+      0%,88%,100% { transform: translate(0); opacity: 0; }
+      90% { transform: translate(4px, 1px); opacity: 1; }
+      92% { transform: translate(-4px); opacity: 1; }
+      94% { transform: translate(2px, -1px); opacity: 1; }
+      96% { transform: translate(0); opacity: 0; }
+    }
+
+    .hero-sub {
+      max-width: 520px; margin-top: 2.5rem;
+      font-size: 1rem; line-height: 1.7;
+      color: rgba(255,255,255,0.45); opacity: 0;
+      animation: fadeUp 1s 0.9s forwards;
+      min-height: 3.4rem;
+    }
+    .typewriter-cursor {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--cyan); margin-left: 2px;
+      vertical-align: text-bottom; animation: blink 0.8s infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .hero-actions {
+      display: flex; gap: 1.5rem; margin-top: 3rem;
+      opacity: 0; animation: fadeUp 1s 1.1s forwards;
+    }
+    .hero-scroll {
+      position: absolute; bottom: 3rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.5rem; opacity: 0; animation: fadeIn 1s 1.6s forwards;
+    }
+    .scroll-line {
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--cyan));
+      animation: scrollPulse 2s infinite;
+    }
+    .scroll-label {
+      font-size: 0.65rem; letter-spacing: 0.3em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    @keyframes scrollPulse {
+      0%,100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.15); }
+    }
+
+    .bg-text {
+      position: absolute; font-size: clamp(8rem, 25vw, 24rem);
+      font-weight: 900; letter-spacing: -0.05em; color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.035);
+      pointer-events: none; user-select: none; white-space: nowrap;
+      animation: bgFloat 8s ease-in-out infinite;
+    }
+    @keyframes bgFloat {
+      0%,100% { transform: translate(-50%,-50%) scale(1); }
+      50% { transform: translate(-50%,-50%) scale(1.04); }
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn-primary {
+      background: var(--cyan); color: #000; border: none;
+      padding: 1rem 2.5rem; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none;
+      position: relative; overflow: hidden; display: inline-block;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary::before {
+      content: ''; position: absolute; inset: 0;
+      background: #fff; transform: translateX(-101%);
+      transition: transform 0.35s cubic-bezier(.23,1,.32,1);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.35); }
+    .btn-primary:hover::before { transform: translateX(0); }
+    .btn-primary:active { transform: translateY(0); box-shadow: none; }
+    .btn-primary .btn-label { position: relative; }
+
+    .btn-ghost {
+      background: transparent; color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 1rem 2.5rem; font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none; display: inline-block;
+      position: relative; overflow: hidden;
+      transition: color 0.3s, border-color 0.3s, transform 0.2s;
+    }
+    .btn-ghost::before {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.06); transform: translateX(-101%);
+      transition: transform 0.35s cubic-bezier(.23,1,.32,1);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: #fff; transform: translateY(-2px); }
+    .btn-ghost:hover::before { transform: translateX(0); }
+    .btn-ghost:active { transform: translateY(0); }
+
+    /* ripple */
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      transform: scale(0); animation: rippleAnim 0.6s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ─── TICKER ─── */
+    .ticker {
+      position: relative; z-index: 1; overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 1.2rem 0;
+    }
+    .ticker-track {
+      display: flex; gap: 5rem;
+      animation: ticker 28s linear infinite; white-space: nowrap;
+    }
+    .ticker-item {
+      display: flex; align-items: center; gap: 1rem;
+      font-size: 0.7rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted); flex-shrink: 0;
+    }
+    .ticker-dot { width: 4px; height: 4px; background: var(--cyan); border-radius: 50%; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ─── SECTIONS ─── */
+    section { position: relative; z-index: 1; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 4rem; }
+    .section-label {
+      font-size: 0.65rem; letter-spacing: 0.4em;
+      text-transform: uppercase; color: var(--cyan); margin-bottom: 1.5rem;
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: opacity 0.9s cubic-bezier(.16,1,.3,1),
+                  transform 0.9s cubic-bezier(.16,1,.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* scramble text */
+    .scramble { display: inline-block; }
+
+    /* ─── SOBRE ─── */
+    #sobre { padding: 12rem 0 8rem; }
+    .sobre-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8rem; align-items: end;
+    }
+    .sobre-heading {
+      font-size: clamp(3rem, 5vw, 5rem); font-weight: 900;
+      line-height: 1; letter-spacing: -0.03em;
+    }
+    .sobre-heading em { font-style: normal; color: var(--cyan); }
+    .sobre-text { font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.5); }
+    .sobre-num {
+      font-size: 5rem; font-weight: 900; color: var(--cyan);
+      line-height: 1; font-variant-numeric: tabular-nums;
+    }
+    .sobre-num-label {
+      font-size: 0.75rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted); margin-top: 0.5rem;
+    }
+    .sobre-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 2rem; margin-top: 5rem; padding-top: 3rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* ─── MODULOS ─── */
+    #modulos { padding: 8rem 0; background: var(--bg2); }
+    .modulos-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-end; margin-bottom: 5rem;
+    }
+    .modulos-title {
+      font-size: clamp(2.5rem, 4vw, 4.5rem);
+      font-weight: 900; letter-spacing: -0.02em; line-height: 1;
+    }
+    .modulos-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: rgba(255,255,255,0.06);
+    }
+    .modulo-card {
+      background: var(--bg2); padding: 3rem;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: background 0.4s;
+    }
+    .modulo-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 2px; height: 0; background: var(--cyan);
+      transition: height 0.45s cubic-bezier(.16,1,.3,1);
+    }
+    .modulo-card::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,212,255,0.06), transparent 60%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .modulo-card:hover { background: rgba(0,212,255,0.03); }
+    .modulo-card:hover::before { height: 100%; }
+    .modulo-card:hover::after { opacity: 1; }
+    .modulo-num { font-size: 0.65rem; letter-spacing: 0.3em; color: var(--muted); margin-bottom: 2rem; }
+    .modulo-icon { width: 40px; height: 40px; margin-bottom: 1.5rem; }
+    .modulo-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.2; }
+    .modulo-desc { font-size: 0.9rem; line-height: 1.7; color: rgba(255,255,255,0.4); }
+    .modulo-hours {
+      margin-top: 2rem; font-size: 0.7rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan);
+    }
+
+    /* ─── TECNOLOGIAS ─── */
+    #tecnologias { padding: 8rem 0; overflow: hidden; }
+    .tech-marquee {
+      display: flex; gap: 3rem;
+      animation: techScroll 22s linear infinite; margin-top: 4rem;
+    }
+    .tech-marquee:nth-child(2) { animation-direction: reverse; margin-top: 1.5rem; }
+    .tech-tag {
+      flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);
+      padding: 0.8rem 2rem; font-size: 0.8rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); white-space: nowrap;
+      transition: border-color 0.3s, color 0.3s;
+      cursor: default;
+    }
+    .tech-tag:hover { border-color: var(--cyan); color: var(--cyan); }
+    @keyframes techScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ─── DEPOIMENTOS ─── */
+    #depoimentos { padding: 8rem 0; background: var(--bg2); }
+    .depo-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 2px; margin-top: 5rem; background: rgba(255,255,255,0.05);
+    }
+    .depo-card {
+      background: var(--bg2); padding: 3rem;
+      transition: background 0.3s;
+    }
+    .depo-card:hover { background: rgba(0,212,255,0.03); }
+    .depo-stars { color: var(--cyan); font-size: 0.9rem; letter-spacing: 0.1em; margin-bottom: 1.5rem; }
+    .depo-text { font-size: 1rem; line-height: 1.8; color: rgba(255,255,255,0.6); margin-bottom: 2rem; font-style: italic; }
+    .depo-author { display: flex; align-items: center; gap: 1rem; }
+    .depo-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #000; flex-shrink: 0;
+    }
+    .depo-name { font-size: 0.9rem; font-weight: 600; }
+    .depo-role { font-size: 0.75rem; color: var(--muted); }
+
+    /* ─── CTA ─── */
+    #cta { padding: 12rem 0; text-align: center; position: relative; overflow: hidden; }
+    .cta-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-title {
+      font-size: clamp(3.5rem, 7vw, 8rem); font-weight: 900;
+      letter-spacing: -0.03em; line-height: 1; margin-bottom: 2rem;
+    }
+    .cta-sub { font-size: 1.1rem; color: rgba(255,255,255,0.4); margin-bottom: 3.5rem; }
+    .cta-price {
+      display: inline-flex; align-items: baseline;
+      gap: 0.5rem; margin-bottom: 3rem;
+      animation: priceFloat 3s ease-in-out infinite;
+    }
+    @keyframes priceFloat {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .cta-currency { font-size: 1.5rem; color: var(--cyan); font-weight: 700; }
+    .cta-amount { font-size: 5rem; font-weight: 900; line-height: 1; color: var(--cyan); }
+    .cta-period { font-size: 0.8rem; color: var(--muted); align-self: flex-end; margin-bottom: 0.5rem; }
+
+    /* ─── CONTATO ─── */
+    #contato { padding: 8rem 0; background: var(--bg2); }
+
+    .contato-grid {
+      display: grid; grid-template-columns: 1fr 1.4fr;
+      gap: 8rem; align-items: start; margin-top: 5rem;
+    }
+    .contato-info h3 {
+      font-size: clamp(2rem, 3vw, 3.5rem); font-weight: 900;
+      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 1.5rem;
+    }
+    .contato-info h3 em { font-style: normal; color: var(--cyan); }
+    .contato-info p { font-size: 1rem; line-height: 1.8; color: rgba(255,255,255,0.45); margin-bottom: 3rem; }
+    .contato-detail {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1.5rem; color: rgba(255,255,255,0.5);
+    }
+    .contato-detail-icon {
+      width: 36px; height: 36px; border: 1px solid rgba(0,212,255,0.3);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .contato-detail-icon svg { width: 16px; height: 16px; }
+    .contato-detail span { font-size: 0.9rem; }
+
+    /* form */
+    .form-wrap {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 3rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .field {
+      position: relative; margin-bottom: 1.5rem;
+    }
+    .field label {
+      position: absolute; top: 1rem; left: 1rem;
+      font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); pointer-events: none;
+      transition: top 0.25s ease, font-size 0.25s ease, color 0.25s ease;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 0;
+      color: #fff; font-family: inherit; font-size: 1rem;
+      padding: 2rem 1rem 0.75rem;
+      outline: none; resize: none;
+      transition: border-color 0.3s, background 0.3s;
+      -webkit-appearance: none;
+    }
+    .field textarea { min-height: 140px; }
+    .field select option { background: #0c0c12; }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--cyan); background: rgba(0,212,255,0.04);
+    }
+    .field input:focus + label,
+    .field input:not(:placeholder-shown) + label,
+    .field textarea:focus + label,
+    .field textarea:not(:placeholder-shown) + label,
+    .field select:focus + label,
+    .field select:valid + label {
+      top: 0.45rem; font-size: 0.65rem; color: var(--cyan);
+    }
+
+    .field-line {
+      position: absolute; bottom: 0; left: 0;
+      width: 0; height: 2px; background: var(--cyan);
+      transition: width 0.4s cubic-bezier(.16,1,.3,1);
+    }
+    .field input:focus ~ .field-line,
+    .field textarea:focus ~ .field-line,
+    .field select:focus ~ .field-line { width: 100%; }
+
+    .form-submit { margin-top: 0.5rem; width: 100%; }
+    .btn-submit {
+      width: 100%; padding: 1.1rem;
+      background: var(--cyan); color: #000; border: none;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,212,255,0.4); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit .btn-label { position: relative; display: inline-block; transition: transform 0.3s, opacity 0.3s; }
+    .btn-submit .btn-loader {
+      position: absolute; inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      opacity: 0; transform: translateY(10px);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .btn-submit.loading .btn-label { transform: translateY(-10px); opacity: 0; }
+    .btn-submit.loading .btn-loader { opacity: 1; transform: translateY(0); }
+
+    .spinner {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.3); border-top-color: #000;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-success {
+      display: none; text-align: center; padding: 3rem;
+    }
+    .form-success.show { display: block; }
+    .form-success-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem; animation: successPop 0.5s cubic-bezier(.16,1,.3,1);
+    }
+    @keyframes successPop {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .form-success h4 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .form-success p { color: rgba(255,255,255,0.5); font-size: 0.95rem; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 4rem; display: flex;
+      justify-content: space-between; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .footer-logo { font-size: 1.2rem; font-weight: 900; letter-spacing: 0.3em; color: var(--cyan); }
+    .footer-copy { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.05em; }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a {
+      font-size: 0.75rem; color: var(--muted); text-decoration: none;
+      letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.3s;
+    }
+    .footer-links a:hover { color: #fff; }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { padding: 1.5rem 2rem; }
+      .nav-links { display: none; }
+      .container { padding: 0 2rem; }
+      .sobre-grid, .contato-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .modulos-grid { grid-template-columns: 1fr; }
+      .depo-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 2rem; text-align: center; }
+      .cursor, .cursor-ring { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">ROBOLAB</a>
+    <ul class="nav-links">
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#modulos">Módulos</a></li>
+      <li><a href="#tecnologias">Tecnologias</a></li>
+      <li><a href="#depoimentos">Depoimentos</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+    <a href="#cta" class="nav-cta"><span>Inscrever-se</span></a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="bg-text" style="top:50%;left:50%;transform:translate(-50%,-50%)">ROBO</div>
+    <p class="hero-eyebrow">Curso completo de robótica — Turma 2025</p>
+    <h1 class="hero-title">
+      <span class="line1 glitch" data-text="ROBÓTICA">ROBÓTICA</span>
+      <span class="line2">DO FUTURO</span>
+    </h1>
+    <p class="hero-sub" id="typewriterEl"><span class="typewriter-cursor"></span></p>
+    <div class="hero-actions">
+      <a href="#cta" class="btn-primary"><span class="btn-label">Começar agora</span></a>
+      <a href="#modulos" class="btn-ghost"><span class="btn-label">Ver módulos</span></a>
+    </div>
+    <div class="hero-scroll">
+      <span class="scroll-label">Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <div class="ticker-item"><div class="ticker-dot"></div>Arduino & Raspberry Pi</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Machine Learning</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Visão Computacional</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Impressão 3D</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>ROS — Robot OS</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Python & C++</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Eletrônica Digital</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Robôs Autônomos</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Arduino & Raspberry Pi</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Machine Learning</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Visão Computacional</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Impressão 3D</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>ROS — Robot OS</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Python & C++</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Eletrônica Digital</div>
+      <div class="ticker-item"><div class="ticker-dot"></div>Robôs Autônomos</div>
+    </div>
+  </div>
+
+  <!-- SOBRE -->
+  <section id="sobre">
+    <div class="container">
+      <div class="sobre-grid">
+        <div class="reveal">
+          <p class="section-label">// 01 — Sobre o curso</p>
+          <h2 class="sobre-heading">
+            Construa robôs que<br>
+            <em class="scramble" data-text="mudam o mundo">mudam o mundo</em>
+          </h2>
+        </div>
+        <div class="reveal">
+          <p class="sobre-text">O ROBOLAB é o curso mais completo de robótica do Brasil. Em 6 meses, você sai do zero à construção de robôs autônomos com câmeras, sensores e inteligência artificial integrada.</p>
+          <p class="sobre-text" style="margin-top:1.5rem">Aulas práticas, projetos reais e uma comunidade de makers que vai te acompanhar por toda a sua jornada tecnológica.</p>
+        </div>
+      </div>
+      <div class="sobre-stats reveal">
+        <div><div class="sobre-num" id="count1">0</div><div class="sobre-num-label">Alunos formados</div></div>
+        <div><div class="sobre-num" id="count2">0</div><div class="sobre-num-label">Horas de conteúdo</div></div>
+        <div><div class="sobre-num" id="count3">0</div><div class="sobre-num-label">Projetos práticos</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MÓDULOS -->
+  <section id="modulos">
+    <div class="container">
+      <div class="modulos-header reveal">
+        <div>
+          <p class="section-label">// 02 — Módulos</p>
+          <h2 class="modulos-title scramble" data-text="O que você aprende">O que você aprende</h2>
+        </div>
+        <span style="font-size:0.8rem;color:var(--muted);letter-spacing:0.1em">6 módulos / 240h</span>
+      </div>
+      <div class="modulos-grid reveal">
+
+        <div class="modulo-card">
+          <div class="modulo-num">01 —</div>
+          <svg class="modulo-icon" viewBox="0 0 40 40" fill="none">
+            <rect x="4" y="12" width="32" height="20" rx="2" stroke="#00d4ff" stroke-width="1.5"/>
+            <path d="M12 12V8M28 12V8M4 20h32" stroke="#00d4ff" stroke-width="1.5"/>
+            <circle cx="12" cy="26" r="2" fill="#00d4ff"/>
+            <circle cx="20" cy="26" r="2" fill="#00d4ff"/>
+            <circle cx="28" cy="26" r="2" fill="#00d4ff"/>
+          </svg>
+          <div class="modulo-name">Eletrônica & Microcontroladores</div>
+          <div class="modulo-desc">Circuitos, Arduino, Raspberry Pi, sensores e atuadores. Fundamentos que todo maker precisa dominar.</div>
+          <div class="modulo-hours">40 horas</div>
+        </div>
+
+        <div class="modulo-card">
+          <div class="modulo-num">02 —</div>
+          <svg class="modulo-icon" viewBox="0 0 40 40" fill="none">
+            <path d="M8 28L16 20L22 26L32 12" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="8" cy="28" r="2" fill="#00d4ff"/>
+            <circle cx="32" cy="12" r="2" fill="#00d4ff"/>
+            <path d="M4 36h32" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+          </svg>
+          <div class="modulo-name">Programação para Robótica</div>
+          <div class="modulo-desc">Python, C++ e lógica de programação aplicada a sistemas embarcados e controle de motores.</div>
+          <div class="modulo-hours">50 horas</div>
+        </div>
+
+        <div class="modulo-card">
+          <div class="modulo-num">03 —</div>
+          <svg class="modulo-icon" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="10" stroke="#00d4ff" stroke-width="1.5"/>
+            <circle cx="20" cy="20" r="4" fill="#00d4ff" opacity="0.4"/>
+            <circle cx="20" cy="20" r="2" fill="#00d4ff"/>
+            <path d="M20 4v4M20 32v4M4 20h4M32 20h4" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div class="modulo-name">Visão Computacional</div>
+          <div class="modulo-desc">OpenCV, detecção de objetos, reconhecimento de padrões e câmeras para robótica.</div>
+          <div class="modulo-hours">40 horas</div>
+        </div>
+
+        <div class="modulo-card">
+          <div class="modulo-num">04 —</div>
+          <svg class="modulo-icon" viewBox="0 0 40 40" fill="none">
+            <rect x="10" y="16" width="20" height="14" rx="2" stroke="#00d4ff" stroke-width="1.5"/>
+            <path d="M16 16V12a4 4 0 018 0v4" stroke="#00d4ff" stroke-width="1.5"/>
+            <path d="M15 23h4M21 23h4" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div class="modulo-name">Inteligência Artificial</div>
+          <div class="modulo-desc">Machine learning, redes neurais e modelos de IA aplicados ao controle autônomo de robôs.</div>
+          <div class="modulo-hours">50 horas</div>
+        </div>
+
+        <div class="modulo-card">
+          <div class="modulo-num">05 —</div>
+          <svg class="modulo-icon" viewBox="0 0 40 40" fill="none">
+            <path d="M20 6L34 14V26L20 34L6 26V14L20 6Z" stroke="#00d4ff" stroke-width="1.5"/>
+            <path d="M20 6V34M6 14l14 6 14-6M6 26l14-6 14 6" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+          </svg>
+          <div class="modulo-name">ROS — Robot Operating System</div>
+          <div class="modulo-desc">O sistema operacional padrão da indústria. Navegação, mapeamento e planejamento autônomo.</div>
+          <div class="modulo-hours">40 horas</div>
+        </div>
+
+        <div class="modulo-card">
+          <div class="modulo-num">06 —</div>
+          <svg class="modulo-icon" viewBox="0 0 40 40" fill="none">
+            <rect x="6" y="6" width="12" height="12" rx="1" stroke="#00d4ff" stroke-width="1.5"/>
+            <rect x="22" y="6" width="12" height="12" rx="1" stroke="#00d4ff" stroke-width="1.5"/>
+            <rect x="6" y="22" width="12" height="12" rx="1" stroke="#00d4ff" stroke-width="1.5"/>
+            <rect x="22" y="22" width="12" height="12" rx="1" stroke="#00d4ff" stroke-width="1.5"/>
+            <circle cx="20" cy="20" r="2" fill="#00d4ff"/>
+          </svg>
+          <div class="modulo-name">Projeto Final — Robô Autônomo</div>
+          <div class="modulo-desc">Construa um robô completo do zero: hardware, software, IA e apresentação para banca avaliadora.</div>
+          <div class="modulo-hours">20 horas</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- TECNOLOGIAS -->
+  <section id="tecnologias">
+    <div class="container">
+      <p class="section-label reveal">// 03 — Tecnologias</p>
+      <h2 class="reveal scramble" data-text="Ferramentas que o mercado usa"
+          style="font-size:clamp(2.5rem,4vw,4rem);font-weight:900;letter-spacing:-0.02em;line-height:1">
+        Ferramentas que o mercado usa
+      </h2>
+    </div>
+    <div style="margin-top:4rem;overflow:hidden">
+      <div class="tech-marquee">
+        <span class="tech-tag">Arduino</span><span class="tech-tag">Raspberry Pi</span>
+        <span class="tech-tag">Python</span><span class="tech-tag">C++</span>
+        <span class="tech-tag">ROS 2</span><span class="tech-tag">OpenCV</span>
+        <span class="tech-tag">TensorFlow</span><span class="tech-tag">PyTorch</span>
+        <span class="tech-tag">Arduino</span><span class="tech-tag">Raspberry Pi</span>
+        <span class="tech-tag">Python</span><span class="tech-tag">C++</span>
+        <span class="tech-tag">ROS 2</span><span class="tech-tag">OpenCV</span>
+        <span class="tech-tag">TensorFlow</span><span class="tech-tag">PyTorch</span>
+      </div>
+      <div class="tech-marquee">
+        <span class="tech-tag">Fusion 360</span><span class="tech-tag">SolidWorks</span>
+        <span class="tech-tag">KiCad</span><span class="tech-tag">MATLAB</span>
+        <span class="tech-tag">Linux</span><span class="tech-tag">Git</span>
+        <span class="tech-tag">Docker</span><span class="tech-tag">LIDAR</span>
+        <span class="tech-tag">Fusion 360</span><span class="tech-tag">SolidWorks</span>
+        <span class="tech-tag">KiCad</span><span class="tech-tag">MATLAB</span>
+        <span class="tech-tag">Linux</span><span class="tech-tag">Git</span>
+        <span class="tech-tag">Docker</span><span class="tech-tag">LIDAR</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPOIMENTOS -->
+  <section id="depoimentos">
+    <div class="container">
+      <p class="section-label reveal">// 04 — Depoimentos</p>
+      <h2 class="reveal" style="font-size:clamp(2.5rem,4vw,4rem);font-weight:900;letter-spacing:-0.02em;line-height:1">
+        O que nossos<br>alunos dizem
+      </h2>
+      <div class="depo-grid reveal">
+        <div class="depo-card">
+          <div class="depo-stars">★★★★★</div>
+          <p class="depo-text">"Em 6 meses construí meu primeiro robô autônomo. O curso é incrivelmente prático — cada módulo termina com um projeto real que você pode colocar no portfólio."</p>
+          <div class="depo-author">
+            <div class="depo-avatar">MF</div>
+            <div><div class="depo-name">Miguel Ferreira</div><div class="depo-role">Engenheiro de Robótica — SENAI</div></div>
+          </div>
+        </div>
+        <div class="depo-card">
+          <div class="depo-stars">★★★★★</div>
+          <p class="depo-text">"A parte de IA aplicada à robótica me abriu portas que eu nem imaginava. Fui contratado antes mesmo de terminar o curso."</p>
+          <div class="depo-author">
+            <div class="depo-avatar">AS</div>
+            <div><div class="depo-name">Ana Silva</div><div class="depo-role">Desenvolvedora de Sistemas — Embraer</div></div>
+          </div>
+        </div>
+        <div class="depo-card">
+          <div class="depo-stars">★★★★★</div>
+          <p class="depo-text">"Tentei outros cursos antes mas nenhum tinha essa profundidade. O módulo de ROS me deu a base que o mercado de automação exige."</p>
+          <div class="depo-author">
+            <div class="depo-avatar">RC</div>
+            <div><div class="depo-name">Rafael Costa</div><div class="depo-role">Automation Engineer — Bosch</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta">
+    <div class="cta-bg"></div>
+    <div class="container" style="text-align:center">
+      <p class="section-label reveal">// Inscrições abertas</p>
+      <h2 class="cta-title reveal scramble" data-text="Comece sua jornada hoje">Comece sua jornada hoje</h2>
+      <p class="cta-sub reveal">Vagas limitadas para a turma de janeiro 2025.</p>
+      <div class="cta-price reveal">
+        <span class="cta-currency">R$</span>
+        <span class="cta-amount">297</span>
+        <span class="cta-period">/mês</span>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap">
+        <a href="#contato" class="btn-primary"><span class="btn-label">Garantir minha vaga</span></a>
+        <a href="#modulos" class="btn-ghost"><span class="btn-label">Ver grade completa</span></a>
+      </div>
+      <p class="reveal" style="margin-top:2rem;font-size:0.8rem;color:var(--muted);letter-spacing:0.05em">
+        7 dias de garantia · Acesso vitalício · Certificado reconhecido
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section id="contato">
+    <div class="container">
+      <p class="section-label reveal">// 05 — Contato</p>
+
+      <div class="contato-grid">
+        <div class="reveal">
+          <h3>Fale com<br><em>nossa equipe</em></h3>
+          <p>Tem dúvidas sobre o curso, formas de pagamento ou quer saber mais antes de se inscrever? Estamos aqui para ajudar.</p>
+
+          <div class="contato-detail">
+            <div class="contato-detail-icon">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#00d4ff" stroke-width="1.5">
+                <path d="M2 4l6 5 6-5M2 4h12v9H2V4Z"/>
+              </svg>
+            </div>
+            <span>contato@robolab.com.br</span>
+          </div>
+
+          <div class="contato-detail">
+            <div class="contato-detail-icon">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#00d4ff" stroke-width="1.5">
+                <path d="M3 2h3l1.5 3.5-2 1.2a9 9 0 004.8 4.8L11.5 9.5 15 11v3c-6.6.5-12.5-5.4-12-12Z"/>
+              </svg>
+            </div>
+            <span>+55 (11) 99999-0000</span>
+          </div>
+
+          <div class="contato-detail">
+            <div class="contato-detail-icon">
+              <svg viewBox="0 0 16 16" fill="none" stroke="#00d4ff" stroke-width="1.5">
+                <circle cx="8" cy="7" r="3"/><path d="M8 1a6 6 0 016 6c0 4-6 9-6 9S2 11 2 7a6 6 0 016-6Z"/>
+              </svg>
+            </div>
+            <span>São Paulo, SP — Brasil</span>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <div class="form-wrap" id="formWrap">
+            <form id="contactForm" novalidate>
+              <div class="form-row">
+                <div class="field">
+                  <input type="text" id="nome" placeholder=" " autocomplete="off" required>
+                  <label for="nome">Nome</label>
+                  <div class="field-line"></div>
+                </div>
+                <div class="field">
+                  <input type="email" id="email" placeholder=" " autocomplete="off" required>
+                  <label for="email">E-mail</label>
+                  <div class="field-line"></div>
+                </div>
+              </div>
+
+              <div class="field">
+                <select id="assunto" required>
+                  <option value="" disabled selected></option>
+                  <option value="inscricao">Quero me inscrever</option>
+                  <option value="duvida">Dúvida sobre o curso</option>
+                  <option value="pagamento">Formas de pagamento</option>
+                  <option value="parceria">Parceria / Empresa</option>
+                  <option value="outro">Outro assunto</option>
+                </select>
+                <label for="assunto">Assunto</label>
+                <div class="field-line"></div>
+              </div>
+
+              <div class="field">
+                <textarea id="mensagem" placeholder=" " required></textarea>
+                <label for="mensagem">Mensagem</label>
+                <div class="field-line"></div>
+              </div>
+
+              <div class="form-submit">
+                <button type="submit" class="btn-submit" id="submitBtn">
+                  <span class="btn-label">Enviar mensagem</span>
+                  <span class="btn-loader"><span class="spinner"></span></span>
+                </button>
+              </div>
+            </form>
+
+            <div class="form-success" id="formSuccess">
+              <div class="form-success-icon">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round">
+                  <path d="M5 14l6 6L23 8"/>
+                </svg>
+              </div>
+              <h4>Mensagem enviada!</h4>
+              <p>Obrigado pelo contato. Nossa equipe responderá em até 24 horas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">ROBOLAB</div>
+    <ul class="footer-links">
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#modulos">Módulos</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 ROBOLAB — Todos os direitos reservados</p>
+  </footer>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       CURSOR
+    ═══════════════════════════════════════════ */
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx=0, my=0, rx=0, ry=0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx - 5 + 'px';
+      cursor.style.top  = my - 5 + 'px';
+    });
+
+    (function animRing() {
+      rx += (mx - rx) * 0.1;
+      ry += (my - ry) * 0.1;
+      ring.style.left = rx - 19 + 'px';
+      ring.style.top  = ry - 19 + 'px';
+      requestAnimationFrame(animRing);
+    })();
+
+    document.querySelectorAll('a, button, .modulo-card, .tech-tag').forEach(el => {
+      el.addEventListener('mouseenter', () => { cursor.classList.add('active'); ring.classList.add('active'); });
+      el.addEventListener('mouseleave', () => { cursor.classList.remove('active'); ring.classList.remove('active'); });
+    });
+
+    /* ═══════════════════════════════════════════
+       RIPPLE on buttons
+    ═══════════════════════════════════════════ */
+    document.querySelectorAll('.btn-primary, .btn-ghost, .btn-submit, .nav-cta').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const r = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height) * 2;
+        r.className = 'ripple';
+        r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+        this.appendChild(r);
+        r.addEventListener('animationend', () => r.remove());
+      });
+    });
+
+    /* ═══════════════════════════════════════════
+       MAGNETIC BUTTONS
+    ═══════════════════════════════════════════ */
+    document.querySelectorAll('.btn-primary, .btn-ghost').forEach(btn => {
+      btn.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top  + rect.height / 2;
+        const dx = (e.clientX - cx) * 0.25;
+        const dy = (e.clientY - cy) * 0.25;
+        this.style.transform = `translate(${dx}px, ${dy}px) translateY(-2px)`;
+      });
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+      });
+    });
+
+    /* ═══════════════════════════════════════════
+       MODULO CARD — spotlight effect
+    ═══════════════════════════════════════════ */
+    document.querySelectorAll('.modulo-card').forEach(card => {
+      card.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1);
+        const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1);
+        this.style.setProperty('--mx', x + '%');
+        this.style.setProperty('--my', y + '%');
+      });
+    });
+
+    /* ═══════════════════════════════════════════
+       CANVAS PARTICLES
+    ═══════════════════════════════════════════ */
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x  = Math.random() * W;
+        this.y  = Math.random() * H;
+        this.vx = (Math.random() - 0.5) * 0.35;
+        this.vy = (Math.random() - 0.5) * 0.35;
+        this.r  = Math.random() * 1.4 + 0.3;
+        this.a  = Math.random() * 0.5 + 0.1;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > W) this.vx *= -1;
+        if (this.y < 0 || this.y > H) this.vy *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,212,255,${this.a})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+    (function animCanvas() {
+      ctx.clearRect(0, 0, W, H);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update(); particles[i].draw();
+        for (let j = i+1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const d  = Math.sqrt(dx*dx + dy*dy);
+          if (d < 110) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0,212,255,${0.1*(1-d/110)})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animCanvas);
+    })();
+
+    /* ═══════════════════════════════════════════
+       TYPEWRITER HERO
+    ═══════════════════════════════════════════ */
+    const twEl   = document.getElementById('typewriterEl');
+    const twText = 'Domine eletrônica, programação e inteligência artificial para construir robôs autônomos que resolvem problemas reais.';
+    let twIdx = 0;
+
+    function typeWrite() {
+      if (twIdx <= twText.length) {
+        twEl.innerHTML = twText.slice(0, twIdx) + '<span class="typewriter-cursor"></span>';
+        twIdx++;
+        setTimeout(typeWrite, twIdx < 5 ? 60 : 28);
+      }
+    }
+    setTimeout(typeWrite, 1400);
+
+    /* ═══════════════════════════════════════════
+       SCRAMBLE TEXT
+    ═══════════════════════════════════════════ */
+    const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&';
+
+    function scrambleEl(el) {
+      const target = el.dataset.text || el.textContent;
+      let frame = 0; const total = 28;
+      const id = setInterval(() => {
+        el.textContent = target.split('').map((ch, i) => {
+          if (ch === ' ') return ' ';
+          if (frame / total > i / target.length) return ch;
+          return CHARS[Math.floor(Math.random() * CHARS.length)];
+        }).join('');
+        if (++frame > total) { el.textContent = target; clearInterval(id); }
+      }, 35);
+    }
+
+    /* ═══════════════════════════════════════════
+       SCROLL REVEAL + SCRAMBLE TRIGGER
+    ═══════════════════════════════════════════ */
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => {
+            e.target.classList.add('visible');
+            e.target.querySelectorAll('.scramble').forEach(s => scrambleEl(s));
+            if (e.target.classList.contains('scramble')) scrambleEl(e.target);
+          }, i * 80);
+          revealObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(r => revealObs.observe(r));
+
+    /* ═══════════════════════════════════════════
+       COUNTERS
+    ═══════════════════════════════════════════ */
+    function animCount(el, target, suffix='') {
+      let v = 0; const step = target / 55;
+      const t = setInterval(() => {
+        v += step;
+        if (v >= target) { v = target; clearInterval(t); }
+        el.textContent = Math.floor(v).toLocaleString('pt-BR') + suffix;
+      }, 22);
+    }
+
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        animCount(document.getElementById('count1'), 2400, '+');
+        animCount(document.getElementById('count2'), 240, 'h');
+        animCount(document.getElementById('count3'), 36, '+');
+        e.target._obs && e.target._obs.disconnect();
+      }
+    }, { threshold: 0.5 }).observe(document.querySelector('.sobre-stats'));
+
+    /* ═══════════════════════════════════════════
+       CONTACT FORM
+    ═══════════════════════════════════════════ */
+    const form      = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const success   = document.getElementById('formSuccess');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // simple validation
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const msg   = document.getElementById('mensagem').value.trim();
+      if (!nome || !email || !msg) {
+        [document.getElementById('nome'),
+         document.getElementById('email'),
+         document.getElementById('mensagem')].forEach(f => {
+          if (!f.value.trim()) f.style.borderColor = '#ff4466';
+          else f.style.borderColor = '';
+        });
+        return;
+      }
+
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      // simulate send
+      setTimeout(() => {
+        form.style.opacity = '0';
+        form.style.transform = 'translateY(-10px)';
+        form.style.transition = 'opacity 0.4s, transform 0.4s';
+        setTimeout(() => {
+          form.style.display = 'none';
+          success.classList.add('show');
+        }, 400);
+      }, 1800);
+    });
+
+    // clear red border on input
+    document.querySelectorAll('.field input, .field textarea').forEach(f => {
+      f.addEventListener('input', () => { f.style.borderColor = ''; });
+    });
+  </script>
+</body>
+</html>
