@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus } from 'lucide-react';
 import Section from '../layout/Section';
-import SectionIntro from '../ui/SectionIntro';
+import Reveal from '../ui/Reveal';
 import { faqData } from '../../data/faq';
 
+/**
+ * Acordeão em medida estreita, com numeração no lugar do ícone de "+".
+ * O indicador de aberto é o próprio número mudando de opacidade.
+ */
 export default function Faq() {
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <Section id="faq">
-      <SectionIntro title="Perguntas que aparecem em toda primeira conversa" />
+    <Section id="faq" containerClassName="shell-narrow">
+      <Reveal as="h2" className="max-w-[22ch] text-section text-balance">
+        Perguntas que aparecem em toda primeira conversa
+      </Reveal>
 
-      <ul className="mt-14 flex flex-col">
+      <ul className="mt-14">
         {faqData.map((faq, index) => {
           const isOpen = openIndex === index;
           const panelId = `faq-panel-${index}`;
@@ -27,17 +32,18 @@ export default function Faq() {
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
                   aria-controls={panelId}
-                  className="grid w-full grid-cols-[1fr_auto] items-start gap-x-8 py-7 text-left lg:grid-cols-12"
+                  className="flex w-full items-baseline gap-5 py-6 text-left"
                 >
-                  <span className="flex items-start justify-between gap-6 text-[clamp(1.05rem,1.7vw,1.25rem)] font-light text-ink-hi lg:col-span-10">
+                  <span
+                    className={`label shrink-0 transition-opacity duration-300 ${
+                      isOpen ? 'text-ink-hi opacity-100' : 'text-ink-low opacity-60'
+                    }`}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="font-display text-[clamp(1.05rem,1.7vw,1.3rem)] leading-tight tracking-[-0.02em] text-ink-hi">
                     {faq.q}
                   </span>
-                  <Plus
-                    className={`mt-1 h-[18px] w-[18px] shrink-0 justify-self-end text-ink-low transition-transform duration-500 ease-out lg:col-span-2 ${
-                      isOpen ? 'rotate-45' : ''
-                    }`}
-                    aria-hidden="true"
-                  />
                 </button>
               </h3>
 
@@ -53,11 +59,9 @@ export default function Faq() {
                     transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                     className="overflow-hidden"
                   >
-                    <div className="grid grid-cols-1 gap-x-8 pb-8 lg:grid-cols-12">
-                      <p className="max-w-[46rem] text-[15px] leading-[1.75] text-ink-mid lg:col-span-7 lg:col-start-4">
-                        {faq.a}
-                      </p>
-                    </div>
+                    <p className="max-w-[62ch] pb-7 pl-[calc(2ch+1.25rem)] text-[15px] leading-[1.75] text-ink-mid">
+                      {faq.a}
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>

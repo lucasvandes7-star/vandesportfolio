@@ -1,67 +1,53 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import Section from '../layout/Section';
-import SectionIntro from '../ui/SectionIntro';
 import Reveal from '../ui/Reveal';
 import { processData } from '../../data/process';
-import { fadeUp } from '../../lib/motion';
 
 /**
- * Linha conectora desenhada conforme o scroll: comunica progressão, que é o
- * assunto da seção. No mobile a linha é vertical.
+ * Lista vertical com o número na margem, não a timeline horizontal de cinco
+ * colunas iguais. A régua à esquerda é desenhada conforme o scroll, porque
+ * aqui o movimento comunica a própria progressão do processo.
  */
 export default function Process() {
   const ref = useRef(null);
   const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 80%', 'center 55%'],
-  });
-  const scale = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
-  // Sob reduced-motion a linha já nasce completa, nunca em scale 0.
-  const lineStyle = reduce ? undefined : { scaleX: scale };
-  const lineStyleMobile = reduce ? undefined : { scaleY: scale };
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 60%'] });
+  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
     <Section id="processo" className="bg-bg-alt">
-      <SectionIntro
-        index="04"
-        label="Processo"
-        title="Da primeira conversa ao site no ar em duas a quatro semanas."
-        lead="Você aprova cada etapa antes da seguinte começar e sabe exatamente em que ponto o trabalho está."
-      />
+      <div className="grid grid-cols-1 gap-y-5 lg:grid-cols-12 lg:gap-x-8">
+        <Reveal as="h2" className="text-section text-balance lg:col-span-5">
+          Da conversa ao site no ar em duas a quatro semanas
+        </Reveal>
+        <Reveal as="p" className="max-w-[40ch] self-end text-[15px] leading-[1.7] text-ink-mid lg:col-span-4 lg:col-start-9">
+          Você aprova cada etapa antes da seguinte começar e sabe em que ponto o
+          trabalho está.
+        </Reveal>
+      </div>
 
-      <div ref={ref} className="relative mt-16">
-        {/* Trilho horizontal (desktop) */}
-        <div aria-hidden="true" className="absolute inset-x-0 top-[7px] hidden h-px bg-hair lg:block">
-          <motion.div style={lineStyle} className="h-full origin-left bg-ink-low" />
-        </div>
-        {/* Trilho vertical (mobile) */}
-        <div aria-hidden="true" className="absolute bottom-0 left-[7px] top-0 w-px bg-hair lg:hidden">
-          <motion.div style={lineStyleMobile} className="h-full w-full origin-top bg-ink-low" />
+      <div ref={ref} className="relative mt-16 lg:mt-24 lg:pl-[12%]">
+        <div aria-hidden="true" className="absolute bottom-0 left-0 top-0 w-px bg-hair lg:left-[12%]">
+          <motion.div
+            style={reduce ? undefined : { scaleY }}
+            className="h-full w-full origin-top bg-ink-low"
+          />
         </div>
 
-        <ol className="grid grid-cols-1 gap-y-10 lg:grid-cols-5 lg:gap-x-8">
+        <ol>
           {processData.map((step) => (
             <Reveal
               as="li"
               key={step.number}
-              variants={fadeUp}
-              className="relative pl-9 lg:pl-0 lg:pt-9"
+              className="grid grid-cols-1 gap-y-3 border-b border-hair py-8 pl-8 last:border-b-0 sm:grid-cols-12 sm:gap-x-8 sm:py-10"
             >
-              <span
-                aria-hidden="true"
-                className="absolute left-0 top-[3px] h-[9px] w-[9px] rounded-full bg-ink-hi lg:left-0 lg:top-[3px]"
-              />
-              <div className="flex items-baseline gap-3">
-                <span className="label text-ink-low">{step.number}</span>
-                <span className="label text-ink-low">{step.time}</span>
-              </div>
-              <h3 className="mt-3 text-[19px] font-normal text-ink-hi">{step.title}</h3>
-              <p className="mt-2.5 max-w-[22rem] text-[14.5px] leading-[1.65] text-ink-mid">
+              <span className="label text-ink-low sm:col-span-1">{step.number}</span>
+              <h3 className="text-sub text-ink-hi sm:col-span-3">{step.title}</h3>
+              <p className="max-w-[44ch] text-[15px] leading-[1.7] text-ink-mid sm:col-span-6">
                 {step.desc}
               </p>
+              <span className="label text-ink-low sm:col-span-2 sm:text-right">{step.time}</span>
             </Reveal>
           ))}
         </ol>

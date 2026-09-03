@@ -1,32 +1,32 @@
 import React from 'react';
-import Section from '../layout/Section';
 import Reveal from '../ui/Reveal';
 import { metricsData } from '../../data/metrics';
-import { containerTight, fadeUp } from '../../lib/motion';
 
-/** Faixa horizontal dividida por linhas verticais, sem cards. */
+/**
+ * Faixa fina, sem padding de seção: serve de respiro entre dois blocos densos.
+ * A primeira célula é mais larga que as outras, para a régua não ficar
+ * perfeitamente dividida em quatro.
+ */
+const WIDTHS = ['lg:col-span-4', 'lg:col-span-3', 'lg:col-span-3', 'lg:col-span-2'];
+
 export default function Metrics() {
   return (
-    <Section className="border-y border-hair !py-0" containerClassName="!px-0">
-      <Reveal
-        as="dl"
-        variants={containerTight}
-        className="grid grid-cols-2 lg:grid-cols-4"
-      >
-        {metricsData.map((metric) => (
-          <Reveal
-            key={metric.label}
-            variants={fadeUp}
-            className="border-b border-hair px-[clamp(24px,5vw,80px)] py-12 last:border-b-0 sm:py-16 lg:border-b-0 lg:border-r lg:last:border-r-0 [&:nth-child(2)]:border-r-0 lg:[&:nth-child(2)]:border-r [&:nth-child(odd)]:border-r [&:nth-child(3)]:border-b-0"
-          >
-            <dt className="sr-only">{metric.label}</dt>
-            <dd>
-              <span className="block text-metric text-ink-hi">{metric.value}</span>
-              <span className="mt-4 block text-[13.5px] leading-snug text-ink-mid">{metric.label}</span>
-            </dd>
-          </Reveal>
-        ))}
-      </Reveal>
-    </Section>
+    <section className="border-y border-hair py-14 sm:py-16">
+      <div className="shell">
+        <Reveal as="dl" className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-12">
+          {metricsData.map((metric, i) => (
+            <div key={metric.label} className={WIDTHS[i]}>
+              <dt className="sr-only">{metric.label}</dt>
+              <dd>
+                <span className="block font-display text-metric text-ink-hi">{metric.value}</span>
+                <span className="mt-3 block max-w-[16ch] text-[13.5px] leading-snug text-ink-mid">
+                  {metric.label}
+                </span>
+              </dd>
+            </div>
+          ))}
+        </Reveal>
+      </div>
+    </section>
   );
 }

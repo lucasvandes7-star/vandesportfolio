@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowUp } from 'lucide-react';
 import Logo from '../ui/Logo';
 import { NAV, SITE } from '../../data/site';
 import { EMAIL, WHATSAPP_DISPLAY, LOCATION, whatsappLink } from '../../data/contact';
@@ -8,28 +7,24 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-hair bg-bg-alt">
-      <div className="shell py-16 sm:py-20">
-        <div className="grid grid-cols-1 gap-y-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-x-8">
-          {/* Identidade */}
-          <div className="lg:col-span-5">
+    <footer className="border-t border-hair">
+      <div className="shell py-14 sm:py-16">
+        <div className="grid grid-cols-2 gap-y-10 lg:grid-cols-12 lg:gap-x-8">
+          <div className="col-span-2 lg:col-span-4">
             <Logo className="text-ink-hi" />
-            <p className="mt-4 max-w-[24rem] text-[14.5px] leading-[1.7] text-ink-mid">
-              {SITE.name}, {SITE.role.toLowerCase()}. Sites, interfaces e sistemas de
-              gestão sob medida.
+            <p className="mt-4 max-w-[26ch] text-[14px] leading-[1.7] text-ink-mid">
+              {SITE.role}. Sites, interfaces e sistemas de gestão sob medida.
             </p>
-            <p className="mt-5 text-[13.5px] text-ink-low">{LOCATION}</p>
           </div>
 
-          {/* Navegação */}
-          <nav aria-label="Rodapé" className="lg:col-span-3 lg:col-start-7">
-            <h2 className="label mb-5 text-ink-low">Navegação</h2>
-            <ul className="flex flex-col gap-3">
+          <nav aria-label="Rodapé" className="lg:col-span-3 lg:col-start-6">
+            <h2 className="label mb-4 text-ink-low">Navegação</h2>
+            <ul className="flex flex-col gap-2.5">
               {NAV.map((item) => (
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    className="text-[14.5px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
+                    className="text-[14px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
                   >
                     {item.label}
                   </a>
@@ -38,14 +33,13 @@ export default function Footer() {
             </ul>
           </nav>
 
-          {/* Contato */}
           <div className="lg:col-span-3 lg:col-start-10">
-            <h2 className="label mb-5 text-ink-low">Contato</h2>
-            <ul className="flex flex-col gap-3">
+            <h2 className="label mb-4 text-ink-low">Contato</h2>
+            <ul className="flex flex-col gap-2.5">
               <li>
                 <a
                   href={`mailto:${EMAIL}`}
-                  className="text-[14.5px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
+                  className="break-all text-[14px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
                 >
                   {EMAIL}
                 </a>
@@ -55,28 +49,25 @@ export default function Footer() {
                   href={whatsappLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[14.5px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
+                  className="text-[14px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
                 >
                   {WHATSAPP_DISPLAY}
                 </a>
               </li>
+              <li className="text-[14px] text-ink-low">{LOCATION}</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col-reverse items-start justify-between gap-6 border-t border-hair pt-8 sm:flex-row sm:items-center">
-          <p className="text-[13px] text-ink-low">
-            © {year} {SITE.name}. Todos os direitos reservados.
+        <div className="mt-14 flex flex-col-reverse items-start justify-between gap-4 border-t border-hair pt-7 sm:flex-row sm:items-center">
+          <p className="text-[12.5px] text-ink-low">
+            © {year} {SITE.name}
           </p>
           <a
             href="#topo"
-            className="group inline-flex items-center gap-2 text-[13px] text-ink-mid transition-colors duration-300 hover:text-ink-hi"
+            className="text-[12.5px] text-ink-low transition-colors duration-300 hover:text-ink-hi"
           >
             Voltar ao topo
-            <ArrowUp
-              className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
-              aria-hidden="true"
-            />
           </a>
         </div>
       </div>

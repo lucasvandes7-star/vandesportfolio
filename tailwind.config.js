@@ -42,27 +42,37 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Manrope", "system-ui", "sans-serif"],
+        // Bricolage tem larguras irregulares e opsz variável: ganha caráter em
+        // corpo grande. Instrument Sans fica só no texto corrido, onde a
+        // neutralidade ajuda a leitura.
+        display: ['"Bricolage Grotesque"', "Georgia", "serif"],
+        sans: ['"Instrument Sans"', "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       fontSize: {
+        // Escala com saltos reais entre display e texto, não um degradê linear.
         display: [
-          "clamp(2.75rem, 5.4vw, 5.25rem)",
-          { lineHeight: "0.95", letterSpacing: "-0.03em", fontWeight: "300" },
+          "clamp(2.9rem, 6.4vw, 6.2rem)",
+          { lineHeight: "0.92", letterSpacing: "-0.035em", fontWeight: "400" },
         ],
         section: [
-          "clamp(2.15rem, 3.6vw, 3.6rem)",
-          { lineHeight: "1.02", letterSpacing: "-0.025em", fontWeight: "300" },
+          "clamp(1.95rem, 3.1vw, 3.1rem)",
+          { lineHeight: "1.04", letterSpacing: "-0.028em", fontWeight: "400" },
+        ],
+        sub: [
+          "clamp(1.35rem, 2vw, 1.85rem)",
+          { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "400" },
         ],
         metric: [
-          "clamp(2.6rem, 5vw, 5rem)",
-          { lineHeight: "0.9", letterSpacing: "-0.04em", fontWeight: "300" },
+          "clamp(2.8rem, 5.5vw, 5.4rem)",
+          { lineHeight: "0.86", letterSpacing: "-0.045em", fontWeight: "300" },
         ],
       },
       borderRadius: {
-        btn: "8px",
-        card: "16px",
-        media: "22px",
+        // Sistema quase reto: o arredondamento é a exceção, não o padrão.
+        btn: "3px",
+        card: "4px",
+        media: "2px",
       },
       maxWidth: {
         shell: "1440px",

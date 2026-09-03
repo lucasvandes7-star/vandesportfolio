@@ -4,7 +4,6 @@ import { Menu } from 'lucide-react';
 import { NAV } from '../../data/site';
 import { whatsappLink } from '../../data/contact';
 import Logo from '../ui/Logo';
-import Button from '../ui/Button';
 import MobileMenu from './MobileMenu';
 
 /**
@@ -59,17 +58,18 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button
+            <a
               href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
-              tone={over === 'paper' ? 'paper' : 'dark'}
-              variant="outline"
-              size="md"
-              className="hidden sm:inline-flex"
+              className="group relative hidden text-[14.5px] sm:inline-block"
             >
               Vamos conversar
-            </Button>
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-1.5 left-0 h-px w-full bg-current opacity-40 transition-opacity duration-300 group-hover:opacity-100"
+              />
+            </a>
 
             <button
               type="button"

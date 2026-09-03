@@ -4,7 +4,6 @@ import { X } from 'lucide-react';
 import { NAV } from '../../data/site';
 import { whatsappLink, EMAIL, WHATSAPP_DISPLAY } from '../../data/contact';
 import useFocusTrap from '../../lib/useFocusTrap';
-import Button from '../ui/Button';
 
 /** Menu fullscreen. Prende o foco, trava o scroll e fecha com Esc. */
 export default function MobileMenu({ open, onClose }) {
@@ -74,18 +73,17 @@ export default function MobileMenu({ open, onClose }) {
           </nav>
 
           <div className="shell shrink-0 border-t border-hair py-8">
-            <Button
+            <a
               href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
               onClick={onClose}
-              size="lg"
-              className="w-full"
+              className="text-[16px] text-ink-hi underline decoration-hair-strong decoration-1 underline-offset-[6px]"
             >
               Vamos conversar
-            </Button>
-            <div className="mt-6 flex flex-col gap-1 text-[14px] text-ink-mid">
-              <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+            </a>
+            <div className="mt-6 flex flex-col gap-1.5 text-[14px] text-ink-mid">
+              <a href={`mailto:${EMAIL}`} className="break-all">{EMAIL}</a>
               <span>{WHATSAPP_DISPLAY}</span>
             </div>
           </div>
