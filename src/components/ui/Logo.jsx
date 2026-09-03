@@ -1,9 +1,11 @@
 import React from 'react';
+import { cn } from '../../lib/utils';
 
-export default function Logo({ className = '', width }) {
+/** Wordmark em texto. Herda a cor da zona (hero clara ou fundo escuro). */
+export default function Logo({ className }) {
   return (
-    <span className={`font-display font-semibold text-xl sm:text-2xl tracking-tight text-white ${className}`}>
-      vandrix.site
+    <span className={cn('text-[17px] font-medium tracking-tight', className)}>
+      vandrix<span className="opacity-70">.site</span>
     </span>
   );
 }

@@ -1,30 +1,41 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Marquee from './components/Marquee';
-import Benefits from './components/Benefits';
-import Services from './components/Services';
-import Cases from './components/Cases';
-import Process from './components/Process';
-import Faq from './components/Faq';
-import CtaBanner from './components/CtaBanner';
-import Footer from './components/Footer';
+import { MotionConfig } from 'framer-motion';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import Hero from './components/sections/Hero';
+import Marquee from './components/sections/Marquee';
+import About from './components/sections/About';
+import FeaturedWork from './components/sections/FeaturedWork';
+import Metrics from './components/sections/Metrics';
+import Services from './components/sections/Services';
+import CrmWork from './components/sections/CrmWork';
+import Process from './components/sections/Process';
+import Stack from './components/sections/Stack';
+import Principles from './components/sections/Principles';
+import Faq from './components/sections/Faq';
+import FinalCta from './components/sections/FinalCta';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-ink-900 text-content-mid selection:bg-violet-600 selection:text-white">
-      <Navbar />
-      <main id="conteudo">
-        <Hero />
-        <Marquee />
-        <Benefits />
-        <Services />
-        <Cases />
-        <Process />
-        <Faq />
-        <CtaBanner />
-      </main>
-      <Footer />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-bg text-ink-mid">
+        <Header />
+        <main id="conteudo">
+          <Hero />
+          <Marquee />
+          <About />
+          <FeaturedWork />
+          <Metrics />
+          <Services />
+          <CrmWork />
+          <Process />
+          <Stack />
+          <Principles />
+          <Faq />
+          <FinalCta />
+        </main>
+        <Footer />
+      </div>
+    </MotionConfig>
   );
 }

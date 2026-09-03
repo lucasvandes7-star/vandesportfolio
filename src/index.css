@@ -2,109 +2,163 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   Tokens — fonte única de verdade.
+   O tailwind.config.js referencia estas variáveis; não repita hex por lá.
+
+   O site tem duas zonas de tema: a hero é clara (paper), todo o resto é
+   escuro (bg). Não é um dark mode com toggle — são dois conjuntos de texto
+   escolhidos por seção: ink-* sobre escuro, onpaper-* sobre claro.
+--------------------------------------------------------------------------- */
 :root {
-  --ink-900: #050507;
-  --ink-850: #08080c;
-  --ink-800: #0d0d13;
-  --ink-700: #14141c;
+  /* Zona escura */
+  --bg: #0d0e10;
+  --bg-alt: #141518;
+  --bg-raised: #1b1c20;
 
-  --line-soft: rgba(255, 255, 255, 0.07);
-  --line-mid: rgba(255, 255, 255, 0.12);
+  /* Zona clara (hero) */
+  --paper: #e9e9e7;
+  --paper-soft: #d7d8d6;
 
-  --text-hi: #f4f6fa;
-  --text-mid: #a8b0bf;
-  --text-low: #7d8595;
+  /* Texto sobre fundo escuro */
+  --ink-hi: #f2f2ef;
+  --ink-mid: #989a9f;  /* 6.6:1 sobre --bg  ·  5.9:1 sobre --bg-raised */
+  --ink-low: #8a8c91;  /* 5.7:1 sobre --bg, 5.1:1 sobre --bg-raised: passa AA nos micro-labels de 11px */
 
-  --violet-600: #7c3aed;
-  --violet-500: #8b5cf6;
-  --violet-400: #a855f7;
-  --violet-300: #c4b5fd;
+  /* Texto sobre fundo claro */
+  --onpaper-hi: #151619;
+  --onpaper-mid: #4a4c51; /* ~8:1 sobre --paper. O #989a9f daria 2.5:1 e reprovaria em AA */
+  --onpaper-low: #5c5e63;  /* 6.4:1 sobre --paper */
+
+  /* Linhas */
+  --hair: rgba(255, 255, 255, 0.08);
+  --hair-strong: rgba(255, 255, 255, 0.16);
+  --hair-paper: rgba(0, 0, 0, 0.1);
+  --hair-paper-strong: rgba(0, 0, 0, 0.22);
+
+  /* Acentos neutros */
+  --accent-gray: #b8babd;
+  --accent-silver: #cacbcd;
+
+  /* Estados — alpha embutido, porque cores via var() não aceitam o
+     modificador de opacidade do Tailwind (bg-bg/50 não funcionaria) */
+  --surface-hover: #212227;
+  --header-bg: rgba(13, 14, 16, 0.72);
+  --header-bg-paper: rgba(233, 233, 231, 0.72);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Compensa o header fixo ao navegar por âncora */
+    scroll-padding-top: 96px;
+  }
+
   body {
-    background-color: var(--ink-900);
-    color: var(--text-mid);
-    font-family: 'Instrument Sans', system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--ink-mid);
+    font-family: 'Manrope', system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4 {
-    font-family: 'Outfit', system-ui, sans-serif;
-    color: var(--text-hi);
-    letter-spacing: -0.03em;
-    font-weight: 600;
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--ink-hi);
+    font-weight: 300;
+    letter-spacing: -0.025em;
   }
 
-  /* Foco visível para navegação por teclado */
   :focus-visible {
-    outline: 2px solid var(--violet-500);
+    outline: 2px solid var(--ink-hi);
     outline-offset: 3px;
     border-radius: 4px;
+  }
+
+  /* Dentro da hero clara o foco precisa inverter para continuar visível */
+  .on-paper :focus-visible {
+    outline-color: var(--onpaper-hi);
+  }
+
+  ::selection {
+    background-color: var(--ink-hi);
+    color: var(--bg);
   }
 }
 
 @layer components {
-  /* Superfície padrão de card */
-  .surface {
-    background-color: var(--ink-800);
-    border: 1px solid var(--line-soft);
-    transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Container editorial padrão */
+  .shell {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: clamp(24px, 5vw, 80px);
   }
 
-  .surface:hover {
-    border-color: var(--line-mid);
-    background-color: var(--ink-700);
-  }
-
-  /* Rótulo técnico do badge de seção */
-  .kicker {
+  /* Rótulo técnico em mono — números de seção e micro-informações */
+  .label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 11px;
-    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-mid);
+    line-height: 1;
+  }
+
+  /* Header muda de zona conforme o scroll, sem condicional de className no JSX */
+  .site-header[data-over='paper'] {
+    color: var(--onpaper-hi);
+  }
+  .site-header[data-over='dark'] {
+    color: var(--ink-hi);
+    background-color: var(--header-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--hair);
   }
 }
 
-/* Halo roxo de fundo — usado uma vez, atrás do hero */
-.violet-halo {
-  background: radial-gradient(
-    ellipse 80% 55% at 50% 0%,
-    rgba(124, 58, 237, 0.18) 0%,
-    rgba(124, 58, 237, 0.05) 40%,
-    transparent 70%
-  );
+@layer utilities {
+  /* Máscara de fade nas bordas do marquee */
+  .marquee-mask {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  /* Dissolve a base da foto da hero na diagonal */
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 78%, rgba(0,0,0,0.55) 92%, transparent);
+    mask-image: linear-gradient(to bottom, black 78%, rgba(0,0,0,0.55) 92%, transparent);
+  }
 }
 
-/* Máscara de fade nas bordas do marquee */
-.marquee-mask {
-  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-}
-
-/* Scrollbar */
+/* Scrollbar neutra */
 ::-webkit-scrollbar {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--ink-900);
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #232330;
+  background: #2a2b30;
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--violet-600);
+  background: var(--ink-low);
 }
 
+/* Cobre animações CSS. As do Framer Motion são inline e escapam daqui —
+   por isso o App também usa <MotionConfig reducedMotion="user">. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
