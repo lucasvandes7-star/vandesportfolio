@@ -1,6 +1,6 @@
 export const WHATSAPP_NUMBER = '5551984114248';
 export const WHATSAPP_DISPLAY = '(51) 98411-4248';
-export const EMAIL = 'vandrix2026@gmail.com';
+export const EMAIL = 'lucasvandes8@gmail.com';
 export const LOCATION = 'Atendimento remoto, Brasil';
 
 export function whatsappLink(

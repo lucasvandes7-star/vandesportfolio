@@ -5,7 +5,7 @@ import { cn } from '../../lib/utils';
 export default function Logo({ className }) {
   return (
     <span className={cn('text-[17px] font-medium tracking-tight', className)}>
-      vandrix<span className="opacity-70">.site</span>
+      Lucas <span className="opacity-70">Vandes</span>
     </span>
   );
 }
