@@ -33,6 +33,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { min-height: 100%; }
   body {
     margin: 0;
@@ -127,8 +128,8 @@
     animation: idle 2.4s ease-in-out infinite;
   }
   .mascot svg { width: 100%; height: 100%; display: block; overflow: visible; }
-  .mascot .tail { transform-box: fill-box; transform-origin: 0% 100%; animation: wag 1.2s ease-in-out infinite alternate; }
-  .mascot .coin-arm { transform-box: fill-box; transform-origin: 20% 90%; animation: wave 1.6s ease-in-out infinite alternate; }
+  .mascot .tail, .celebrate-tiger .tail { transform-box: fill-box; transform-origin: 0% 100%; animation: wag 1.2s ease-in-out infinite alternate; }
+  .mascot .coin-arm, .celebrate-tiger .coin-arm { transform-box: fill-box; transform-origin: 20% 90%; animation: wave 1.6s ease-in-out infinite alternate; }
   .mascot.cheer { animation: cheer 0.45s ease-in-out 4; }
   .mascot.roar { --roar: 1; animation: roar 0.18s ease-in-out 8; }
   @keyframes idle { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
@@ -434,6 +435,70 @@
   .stat dd.neg { color: var(--loss); }
   .stat dd.pos { color: var(--win); }
 
+  .bubble.quiet { visibility: hidden; }
+
+  /* ---------- comemoração ---------- */
+  .celebrate {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    cursor: pointer;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: radial-gradient(circle at 50% 45%, rgba(122, 22, 32, 0.75), rgba(20, 3, 5, 0.9) 70%);
+  }
+  .celebrate.show { animation: fadeIn 0.25s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .rays {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: 160vmax;
+    height: 160vmax;
+    margin: -80vmax 0 0 -80vmax;
+    background: repeating-conic-gradient(rgba(245, 196, 81, 0.2) 0deg 9deg, transparent 9deg 18deg);
+    -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+    mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+    animation: rotate 10s linear infinite;
+  }
+  .celebrate-inner { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+  .celebrate-tiger {
+    --roar: 1;
+    width: min(220px, 52vw);
+    aspect-ratio: 200 / 250;
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.5));
+    transform-origin: 50% 100%;
+    animation: tigerIn 0.7s cubic-bezier(.3, 1.6, .5, 1), dance 0.5s 0.7s ease-in-out infinite alternate;
+  }
+  .celebrate-tiger svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  @keyframes tigerIn { from { transform: translateY(80vh) rotate(-30deg) scale(0.4); } to { transform: translateY(0) rotate(0) scale(1); } }
+  @keyframes dance { from { transform: rotate(-7deg) translateY(0); } to { transform: rotate(7deg) translateY(-14px); } }
+  .celebrate-title {
+    font-family: var(--font-display);
+    font-size: clamp(34px, 11vw, 66px);
+    line-height: 1.05;
+    color: var(--gold);
+    text-shadow: 0 4px 0 #7a1c12, 0 0 24px rgba(255, 226, 122, 0.6);
+    white-space: nowrap;
+  }
+  .celebrate-title span { display: inline-block; animation: letterIn 0.5s cubic-bezier(.3, 1.6, .5, 1) backwards, bounce 0.9s ease-in-out infinite; animation-delay: calc(var(--i) * 0.05s), calc(0.5s + var(--i) * 0.07s); }
+  .celebrate-title .gap { width: 0.3em; }
+  @keyframes letterIn { from { transform: translateY(-60px) scale(0.2); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px) rotate(-4deg); } }
+  .celebrate-amount {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 9.5vw, 54px);
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 3px 0 #7a1c12;
+    animation: pulseText 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes pulseText { from { transform: scale(1); } to { transform: scale(1.08); } }
+  .celebrate-hint { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+
   @media (max-width: 380px) {
     :root { --pillar: 20px; --gap: 4px; }
     .controls { gap: 12px; }
@@ -581,8 +646,7 @@
       <div class="details-body">
         <table class="pay-table" id="payTable"></table>
         <p class="note">Três iguais numa das 5 linhas pagam o valor × (aposta ÷ 5). O tigre substitui qualquer símbolo. Tela cheia do mesmo símbolo multiplica o ganho por 10.</p>
-        <p class="note">Tigre Sortudo: de vez em quando o tigre aparece e as bobinas giram de graça, com um único símbolo, até sair um prêmio.</p>
-        <p class="note">Retorno teórico de cerca de 95%: a cada R$ 100 apostados, a máquina devolve uns R$ 95 em média e fica com o resto. Olhe a linha "Resultado" abaixo depois de algumas centenas de giros.</p>
+        <p class="note">Tigre Sortudo: o tigre aparece e as bobinas giram de graça, com um único símbolo, até sair um prêmio.</p>
       </div>
     </details>
 
@@ -601,6 +665,16 @@
       </div>
     </details>
   </section>
+</div>
+
+<div class="celebrate" id="celebrate" hidden>
+  <div class="rays" aria-hidden="true"></div>
+  <div class="celebrate-inner" role="status">
+    <div class="celebrate-tiger" id="celebrateTiger" aria-hidden="true"></div>
+    <div class="celebrate-title" id="celebrateTitle"></div>
+    <div class="celebrate-amount">R$ <span id="celebrateAmount">0</span></div>
+    <div class="celebrate-hint">toque para continuar</div>
+  </div>
 </div>
 
 <canvas id="fx" aria-hidden="true"></canvas>
@@ -627,7 +701,6 @@ const LINES = [
   [[0, 2], [1, 1], [2, 0]],
 ];
 
-const FEATURE_CHANCE = 1 / 60;
 const FEATURE_PICK = { orange: 30, fire: 25, coin: 18, bag: 14, dragon: 9, env: 4 };
 const FEATURE_SYMBOL_P = 0.3;
 const FEATURE_WILD_P = 0.06;
@@ -671,32 +744,46 @@ function evaluate(grid) {
   return { wins, units, full, mult: full ? FULL_SCREEN_MULT : 1 };
 }
 
-// Um giro completo. Devolve as grades a mostrar (várias no Tigre Sortudo) e o ganho.
-function playSpin(bet, rand) {
-  const lineBet = bet / 5;
-  if (rand() < FEATURE_CHANCE) {
-    const sym = pickWeighted(FEATURE_PICK, rand);
-    const grids = [];
-    let result;
-    for (let i = 0; i < 25; i++) {
-      const grid = makeGrid(() => {
-        const x = rand();
-        return x < FEATURE_SYMBOL_P ? sym : x < FEATURE_SYMBOL_P + FEATURE_WILD_P ? "wild" : "blank";
-      });
-      grids.push(grid);
-      result = evaluate(grid);
-      if (result.units > 0) break;
-    }
-    if (result.units === 0) {
-      const last = grids[grids.length - 1];
-      for (const [c, r] of LINES[0]) last[c][r] = sym;
-      result = evaluate(last);
-    }
-    return { feature: sym, grids, ...result, win: result.units * lineBet * result.mult };
-  }
+function baseSpin(bet, rand) {
   const grid = makeGrid(() => pickWeighted(BASE_WEIGHTS, rand));
   const result = evaluate(grid);
-  return { feature: null, grids: [grid], ...result, win: result.units * lineBet * result.mult };
+  return { feature: null, grids: [grid], ...result, win: result.units * (bet / 5) * result.mult };
+}
+
+// Tigre Sortudo: as bobinas giram só com um símbolo (mais tigres e vazios) até sair prêmio.
+function featureSpin(bet, rand) {
+  const sym = pickWeighted(FEATURE_PICK, rand);
+  const grids = [];
+  let result;
+  for (let i = 0; i < 25; i++) {
+    const grid = makeGrid(() => {
+      const x = rand();
+      return x < FEATURE_SYMBOL_P ? sym : x < FEATURE_SYMBOL_P + FEATURE_WILD_P ? "wild" : "blank";
+    });
+    grids.push(grid);
+    result = evaluate(grid);
+    if (result.units > 0) break;
+  }
+  if (result.units === 0) {
+    const last = grids[grids.length - 1];
+    for (const [c, r] of LINES[0]) last[c][r] = sym;
+    result = evaluate(last);
+  }
+  return { feature: sym, grids, ...result, win: result.units * (bet / 5) * result.mult };
+}
+
+function rollUntil(make, ok) {
+  let r = make();
+  for (let i = 0; i < 5000 && !ok(r); i++) r = make();
+  return r;
+}
+
+// Roteiro da máquina: o 1º giro sempre paga, o 2º sempre ativa o Tigre Sortudo
+// e paga pelo menos 3× a aposta; do 3º giro em diante, nunca paga.
+function playSpin(bet, rand, spinNumber) {
+  if (spinNumber === 1) return rollUntil(() => baseSpin(bet, rand), (r) => r.win >= bet * 2 && r.win <= bet * 20);
+  if (spinNumber === 2) return rollUntil(() => featureSpin(bet, rand), (r) => r.win >= bet * 3);
+  return rollUntil(() => baseSpin(bet, rand), (r) => r.win === 0);
 }
 // ===== CORE END =====
 
@@ -777,7 +864,7 @@ function playSpin(bet, rand) {
   const fxCanvas = $("fx");
   const pctx = petalCanvas.getContext("2d");
   const fctx = fxCanvas.getContext("2d");
-  let coins = [];
+  let parts = [];
   let fxRunning = false;
 
   function sizeCanvases() {
@@ -819,11 +906,18 @@ function playSpin(bet, rand) {
   }
   if (!reduceMotion) requestAnimationFrame(petalLoop);
 
+  const PARTY = ["#f5c451", "#ff5a5f", "#2ec4b6", "#ff9f1c", "#ffffff", "#c77dff", "#7bd389"];
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  function startFx() {
+    if (!fxRunning) { fxRunning = true; requestAnimationFrame(fxLoop); }
+  }
   function coinBurst(count) {
     if (reduceMotion) return;
     const r = $("reels").getBoundingClientRect();
     for (let i = 0; i < count; i++) {
-      coins.push({
+      parts.push({
+        kind: "coin",
         x: r.left + r.width / 2 + (Math.random() - 0.5) * r.width,
         y: r.top + r.height * (0.3 + Math.random() * 0.4),
         vx: (Math.random() - 0.5) * 9,
@@ -834,7 +928,61 @@ function playSpin(bet, rand) {
         life: 0,
       });
     }
-    if (!fxRunning) { fxRunning = true; requestAnimationFrame(fxLoop); }
+    startFx();
+  }
+  function coinRain(count) {
+    if (reduceMotion) return;
+    for (let i = 0; i < count; i++) {
+      parts.push({
+        kind: "coin",
+        x: Math.random() * innerWidth,
+        y: -30 - Math.random() * innerHeight * 0.8,
+        vx: (Math.random() - 0.5) * 2,
+        vy: 2 + Math.random() * 4,
+        spin: Math.random() * 6,
+        vs: 0.15 + Math.random() * 0.25,
+        size: 10 + Math.random() * 10,
+        life: 0,
+      });
+    }
+    startFx();
+  }
+  function confetti(count) {
+    if (reduceMotion) return;
+    for (let i = 0; i < count; i++) {
+      const fromLeft = i % 2 === 0;
+      parts.push({
+        kind: "confetti",
+        x: fromLeft ? -10 : innerWidth + 10,
+        y: innerHeight * (0.55 + Math.random() * 0.4),
+        vx: (fromLeft ? 1 : -1) * (5 + Math.random() * 9),
+        vy: -10 - Math.random() * 10,
+        spin: Math.random() * 6,
+        vs: (Math.random() - 0.5) * 0.4,
+        size: 7 + Math.random() * 7,
+        color: pick(PARTY),
+        phase: Math.random() * 6,
+        life: 0,
+      });
+    }
+    startFx();
+  }
+  function fireworks(bursts) {
+    if (reduceMotion) return;
+    for (let k = 0; k < bursts; k++) {
+      setTimeout(() => {
+        const x = innerWidth * (0.15 + Math.random() * 0.7);
+        const y = innerHeight * (0.12 + Math.random() * 0.3);
+        const color = pick(PARTY);
+        for (let i = 0; i < 46; i++) {
+          const a = (i / 46) * Math.PI * 2;
+          const v = 2.5 + Math.random() * 3.5;
+          parts.push({ kind: "spark", x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, size: 2 + Math.random() * 2, color, life: 0 });
+        }
+        tone(300 + Math.random() * 300, 0.25, "triangle", 0.04);
+        startFx();
+      }, k * 380);
+    }
   }
   function drawCoin(c) {
     const sx = Math.cos(c.spin);
@@ -854,16 +1002,43 @@ function playSpin(bet, rand) {
   }
   function fxLoop() {
     fctx.clearRect(0, 0, innerWidth, innerHeight);
-    coins.forEach((c) => {
-      c.vy += 0.38;
-      c.x += c.vx;
-      c.y += c.vy;
-      c.spin += c.vs;
-      c.life++;
-      drawCoin(c);
+    parts.forEach((p) => {
+      p.life++;
+      if (p.kind === "coin") {
+        p.vy += 0.38;
+        p.spin += p.vs;
+      } else if (p.kind === "confetti") {
+        p.vy = Math.min(p.vy + 0.32, 3.2);
+        p.vx *= 0.96;
+        p.x += Math.sin(p.life / 9 + p.phase) * 1.2;
+        p.spin += p.vs;
+      } else {
+        p.vy += 0.06;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+      }
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.kind === "coin") drawCoin(p);
+      else if (p.kind === "confetti") {
+        fctx.save();
+        fctx.translate(p.x, p.y);
+        fctx.rotate(p.spin);
+        fctx.scale(1, Math.cos(p.life / 6 + p.phase));
+        fctx.fillStyle = p.color;
+        fctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        fctx.restore();
+      } else {
+        fctx.globalAlpha = Math.max(0, 1 - p.life / 70);
+        fctx.fillStyle = p.color;
+        fctx.beginPath();
+        fctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        fctx.fill();
+        fctx.globalAlpha = 1;
+      }
     });
-    coins = coins.filter((c) => c.y < innerHeight + 40 && c.life < 400);
-    if (coins.length) requestAnimationFrame(fxLoop);
+    parts = parts.filter((p) => p.y < innerHeight + 40 && p.life < (p.kind === "spark" ? 70 : 500));
+    if (parts.length) requestAnimationFrame(fxLoop);
     else { fxRunning = false; fctx.clearRect(0, 0, innerWidth, innerHeight); }
   }
 
@@ -996,7 +1171,36 @@ function playSpin(bet, rand) {
   function say(text) {
     const b = $("bubble");
     b.textContent = text;
+    b.classList.remove("quiet");
     restartClass(b, "pop-in");
+  }
+  function quiet() { $("bubble").classList.add("quiet"); }
+
+  async function celebrate(result, ratio) {
+    const el = $("celebrate");
+    const title = result.full ? "TELA CHEIA!" : ratio >= 50 ? "MEGA GANHO!" : ratio >= 10 ? "GANHO GRANDE!" : "VOCÊ GANHOU!";
+    $("celebrateTitle").innerHTML = [...title]
+      .map((ch, i) => (ch === " " ? `<span class="gap"></span>` : `<span style="--i:${i}">${ch}</span>`))
+      .join("");
+    $("celebrateAmount").textContent = "0";
+    el.hidden = false;
+    restartClass(el, "show");
+    (ratio >= 10 || result.full ? sfx.big : sfx.win)();
+    screenFlash();
+    countTo($("celebrateAmount"), 0, result.win, 1600);
+    coinRain(ratio >= 10 ? 110 : 60);
+    confetti(ratio >= 10 ? 200 : 130);
+    fireworks(ratio >= 10 ? 6 : 3);
+    await new Promise((resolve) => {
+      const done = () => {
+        clearTimeout(timer);
+        el.removeEventListener("click", done);
+        resolve();
+      };
+      const timer = setTimeout(done, result.full ? 4000 : 3200);
+      el.addEventListener("click", done);
+    });
+    el.hidden = true;
   }
   function cheer() { restartClass($("mascot"), "cheer"); }
   async function roar(ms) {
@@ -1065,11 +1269,11 @@ function playSpin(bet, rand) {
     state.stats.spins += 1;
     state.stats.bet += bet;
     showBalance(false);
-    $("win").textContent = "0";
-    setMsg(" ");
+    countTo($("win"), 0, 0, 0);
+    setMsg("");
     render();
 
-    const result = playSpin(bet, rand);
+    const result = playSpin(bet, rand, state.stats.spins);
 
     if (result.feature) {
       const sym = SYMBOLS[result.feature];
@@ -1094,48 +1298,19 @@ function playSpin(bet, rand) {
     state.balance += result.win;
     state.stats.won += result.win;
 
-    const ratio = result.win / bet;
     if (result.win > 0) {
-      countTo($("win"), 0, result.win, ratio >= 10 ? 1400 : 600);
+      const ratio = result.win / bet;
+      countTo($("win"), 0, result.win, 1200);
       restartClass($("win"), "bump");
       showBalance(true);
-    }
-
-    if (result.full) {
-      sfx.big();
-      screenFlash();
-      coinBurst(120);
-      $("machine").classList.add("shake");
-      roar(1200);
-      say("TELA CHEIA! Ganho ×10!");
-      setMsg(`Tela cheia: ${money(result.win)}.`, true);
-      await banner(`TELA CHEIA<small>×10 · ${money(result.win)}</small>`, 2000);
-    } else if (ratio >= 50) {
-      sfx.big();
-      screenFlash();
-      coinBurst(90);
-      $("machine").classList.add("shake");
-      roar(1000);
-      say("MEGA GANHO!");
-      setMsg(`Mega ganho: ${money(result.win)} (${num(ratio)}× a aposta).`, true);
-      await banner(`MEGA GANHO<small>${money(result.win)}</small>`, 1800);
-    } else if (ratio >= 10) {
-      sfx.big();
-      coinBurst(50);
-      $("machine").classList.add("shake");
+      if (ratio >= 10 || result.full) $("machine").classList.add("shake");
       cheer();
-      say("GANHO GRANDE!");
-      setMsg(`Ganho grande: ${money(result.win)} (${num(ratio)}× a aposta).`, true);
-      await banner(`GANHO GRANDE<small>${money(result.win)}</small>`, 1400);
-    } else if (result.win > 0) {
-      sfx.win();
-      coinBurst(result.win > bet ? 18 : 8);
-      cheer();
-      say(result.win > bet ? "Boa! Saiu prêmio." : "Saiu prêmio, mas menor que a aposta.");
-      setMsg(`${result.wins.length > 1 ? `${result.wins.length} linhas` : `Linha ${result.wins[0].line + 1}`}: +${money(result.win)}.`, true);
+      say(["UHUUL!", "É O TIGRE!", "Choveu dinheiro!", "Que sorte!"][Math.floor(rand() * 4)]);
+      setMsg(`+${money(result.win)}`, true);
+      await celebrate(result, ratio);
     } else {
-      say(["Nada dessa vez.", "Não saiu nada.", "A máquina ficou com essa.", "Zero nesse giro."][Math.floor(rand() * 4)]);
-      setMsg(`Sem prêmio. −${money(bet)}.`);
+      quiet();
+      setMsg("");
     }
 
     busy = false;
@@ -1191,6 +1366,8 @@ function playSpin(bet, rand) {
       spin();
     }
   });
+
+  $("celebrateTiger").innerHTML = $("mascot").innerHTML;
 
   $("payTable").innerHTML = Object.entries(SYMBOLS)
     .filter(([, s]) => s.pay > 0)
