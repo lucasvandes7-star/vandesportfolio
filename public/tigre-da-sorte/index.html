@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tigre da Sorte</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,800&display=swap">
+<style>
+  /* Layout: uma máquina de templo laqueado no centro, mascote em cima, painel de fichas embaixo. Tema único, noite de Ano Novo Lunar. */
+  :root {
+    --lacquer: #5c0f16;
+    --lacquer-deep: #2a0609;
+    --gold: #f5c451;
+    --gold-deep: #b9811f;
+    --paper: #f8e7c2;
+    --paper-edge: #e3c88f;
+    --jade: #1d8f87;
+    --jade-deep: #0f5c57;
+    --ink: #2c0a0b;
+    --cream: #fff4dc;
+    --muted: #e7b8a4;
+    --win: #ffe27a;
+    --loss: #ff9c8a;
+    --font-display: "Lilita One", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --cell: clamp(70px, 22vw, 112px);
+    --gap: 6px;
+    --pillar: 24px;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(245, 196, 81, 0.18), transparent 55%),
+      radial-gradient(ellipse at 50% 120%, var(--lacquer) 0%, var(--lacquer-deep) 70%);
+    background-color: var(--lacquer-deep);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .app {
+    max-width: 520px;
+    margin: 0 auto;
+    padding-block: 16px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ---------- topo ---------- */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 7vw, 34px);
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 2px 0 var(--gold-deep), 0 4px 12px rgba(0, 0, 0, 0.45);
+    letter-spacing: 0.01em;
+  }
+  .chip {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+  }
+  .ghost-btn {
+    font: 600 13px var(--font-body);
+    color: var(--cream);
+    background: transparent;
+    border: 1px solid rgba(255, 244, 220, 0.35);
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ghost-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ---------- palco ---------- */
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+  .mascot-row { display: flex; align-items: flex-end; gap: 10px; min-height: 86px; }
+  .mascot {
+    font-size: 72px;
+    line-height: 1;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+    transform-origin: 50% 100%;
+    animation: idle 2.4s ease-in-out infinite;
+  }
+  .mascot.cheer { animation: cheer 0.45s ease-in-out 4; }
+  .bubble {
+    position: relative;
+    margin-bottom: 30px;
+    background: var(--cream);
+    color: var(--ink);
+    font-weight: 800;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 14px;
+    max-width: 210px;
+    box-shadow: 0 4px 0 var(--paper-edge);
+  }
+  .bubble::before {
+    content: "";
+    position: absolute;
+    left: -7px;
+    bottom: 10px;
+    border-width: 7px 8px 7px 0;
+    border-style: solid;
+    border-color: transparent var(--cream) transparent transparent;
+  }
+  @keyframes idle { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
+  @keyframes cheer { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.08) rotate(-6deg); } }
+
+  .machine {
+    position: relative;
+    display: flex;
+    gap: 6px;
+    padding: 10px 8px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+    box-shadow: 0 0 0 3px var(--lacquer-deep), 0 0 0 5px var(--gold-deep), 0 18px 40px rgba(0, 0, 0, 0.55);
+  }
+  .machine::before {
+    content: "";
+    position: absolute;
+    left: 24px; right: 24px; top: -14px;
+    height: 14px;
+    border-radius: 10px 10px 0 0;
+    background: var(--jade-deep);
+    border: 2px solid var(--gold);
+    border-bottom: 0;
+  }
+
+  .pillar {
+    position: relative;
+    width: var(--pillar);
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--jade-deep), var(--jade) 45%, var(--jade-deep));
+  }
+  .pillar span {
+    position: absolute;
+    left: 0; right: 0;
+    transform: translateY(-50%);
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 17px;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .pillar span.on { color: var(--win); transform: translateY(-50%) scale(1.35); }
+
+  .board { position: relative; }
+  .reels { display: grid; grid-template-columns: repeat(3, var(--cell)); gap: var(--gap); }
+  .reel {
+    height: calc(var(--cell) * 3);
+    overflow: hidden;
+    border-radius: 6px;
+    background: linear-gradient(180deg, var(--paper-edge), var(--paper) 12%, var(--paper) 88%, var(--paper-edge));
+    box-shadow: inset 0 6px 10px rgba(44, 10, 11, 0.25), inset 0 -6px 10px rgba(44, 10, 11, 0.25);
+  }
+  .strip { display: flex; flex-direction: column; will-change: transform; }
+  .sym {
+    height: var(--cell);
+    display: grid;
+    place-items: center;
+    font-size: calc(var(--cell) * 0.58);
+    line-height: 1;
+    user-select: none;
+  }
+  .sym span { display: block; filter: drop-shadow(0 3px 2px rgba(44, 10, 11, 0.3)); }
+  .sym.s-wild { background: radial-gradient(circle, rgba(245, 196, 81, 0.55), transparent 70%); }
+  .sym.s-wild::after {
+    content: "WILD";
+    position: absolute;
+    font-family: var(--font-display);
+    font-size: calc(var(--cell) * 0.2);
+    color: var(--gold);
+    -webkit-text-stroke: 1px #7a1c12;
+    transform: translateY(calc(var(--cell) * 0.3));
+  }
+  .sym.s-wild { position: relative; }
+  .sym.dim { opacity: 0.35; }
+  .sym.hit span { animation: pop 0.6s ease-in-out infinite alternate; }
+  @keyframes pop { from { transform: scale(1); } to { transform: scale(1.14); } }
+
+  .lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .lines polyline {
+    fill: none;
+    stroke: var(--win);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 4px rgba(255, 226, 122, 0.9));
+  }
+
+  .banner {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    pointer-events: none;
+    font-family: var(--font-display);
+    font-size: clamp(28px, 9vw, 44px);
+    line-height: 1.05;
+    color: var(--gold);
+    text-shadow: 0 3px 0 #7a1c12, 0 0 18px rgba(0, 0, 0, 0.7);
+    background: rgba(42, 6, 9, 0.55);
+    border-radius: 6px;
+    animation: bannerIn 0.35s ease-out;
+  }
+  .banner small { display: block; font-size: 0.5em; color: var(--cream); }
+  @keyframes bannerIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ---------- painel ---------- */
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(42, 6, 9, 0.6);
+    border: 1px solid rgba(245, 196, 81, 0.3);
+  }
+  .meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .meter { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+  .meter-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .meter-value {
+    font-family: var(--font-display);
+    font-size: clamp(18px, 5.4vw, 24px);
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .meter-value.gold { color: var(--win); }
+
+  .controls { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .round {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: var(--lacquer);
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .round:disabled { opacity: 0.4; cursor: not-allowed; }
+  .spin {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    border: 4px solid var(--cream);
+    background: radial-gradient(circle at 35% 30%, #ffe58f, var(--gold) 45%, var(--gold-deep));
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #7a4d0f, 0 10px 24px rgba(0, 0, 0, 0.5);
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .spin:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 #7a4d0f, 0 6px 14px rgba(0, 0, 0, 0.5); }
+  .spin:disabled { filter: grayscale(0.5) brightness(0.8); cursor: wait; }
+  .spin.stop { background: radial-gradient(circle at 35% 30%, #ffb3a3, #e0533d 50%, #8e1f14); color: var(--cream); }
+
+  .toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .toggle {
+    font: 800 12px var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cream);
+    background: transparent;
+    border: 1px solid rgba(255, 244, 220, 0.35);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  .toggle[aria-pressed="true"] { background: var(--jade); border-color: var(--jade); }
+  .toggle:hover { border-color: var(--gold); }
+
+  .msg { text-align: center; min-height: 1.5em; font-weight: 600; color: var(--muted); margin: 0; }
+  .msg.good { color: var(--win); }
+
+  button:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+
+  /* ---------- informações ---------- */
+  .info { display: flex; flex-direction: column; gap: 12px; }
+  details {
+    border: 1px solid rgba(245, 196, 81, 0.3);
+    border-radius: 12px;
+    background: rgba(42, 6, 9, 0.45);
+  }
+  summary {
+    cursor: pointer;
+    padding: 12px 14px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--gold);
+  }
+  .details-body { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .pay-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .pay-table td { padding: 5px 4px; border-top: 1px solid rgba(255, 244, 220, 0.1); }
+  .pay-table td:first-child { font-size: 24px; width: 40px; }
+  .pay-table td:last-child { text-align: right; font-weight: 800; color: var(--win); white-space: nowrap; }
+  .note { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+  .stat { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid rgba(255, 244, 220, 0.1); padding-top: 6px; }
+  .stat dt { color: var(--muted); font-size: 13px; }
+  .stat dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stat dd.neg { color: var(--loss); }
+  .stat dd.pos { color: var(--win); }
+
+  .disclaimer {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 380px) {
+    :root { --pillar: 20px; --gap: 4px; }
+    .controls { gap: 12px; }
+    .stats { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mascot, .mascot.cheer, .sym.hit span, .banner { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="brand-name">Tigre da Sorte</span>
+      <span class="chip">Fichas fictícias</span>
+    </div>
+    <button class="ghost-btn" id="soundBtn" type="button" aria-pressed="true">Som ligado</button>
+  </header>
+
+  <section class="stage" aria-label="Máquina">
+    <div class="mascot-row">
+      <div class="mascot" id="mascot" aria-hidden="true">🐯</div>
+      <div class="bubble" id="bubble" role="status">Bora girar? É tudo de mentirinha!</div>
+    </div>
+
+    <div class="machine">
+      <div class="pillar" aria-hidden="true">
+        <span data-line="3" style="top:5%">4</span>
+        <span data-line="1" style="top:16.67%">2</span>
+        <span data-line="0" style="top:50%">1</span>
+        <span data-line="2" style="top:83.33%">3</span>
+        <span data-line="4" style="top:95%">5</span>
+      </div>
+      <div class="board">
+        <div class="reels" id="reels">
+          <div class="reel"><div class="strip"></div></div>
+          <div class="reel"><div class="strip"></div></div>
+          <div class="reel"><div class="strip"></div></div>
+        </div>
+        <svg class="lines" id="lines" viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="banner" id="banner" hidden></div>
+      </div>
+      <div class="pillar" aria-hidden="true">
+        <span data-line="4" style="top:5%">5</span>
+        <span data-line="1" style="top:16.67%">2</span>
+        <span data-line="0" style="top:50%">1</span>
+        <span data-line="2" style="top:83.33%">3</span>
+        <span data-line="3" style="top:95%">4</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Controles">
+    <div class="meters">
+      <div class="meter"><span class="meter-label">Saldo</span><span class="meter-value" id="balance">1.000</span></div>
+      <div class="meter"><span class="meter-label">Aposta</span><span class="meter-value" id="bet">10</span></div>
+      <div class="meter"><span class="meter-label">Ganho</span><span class="meter-value gold" id="win">0</span></div>
+    </div>
+    <div class="controls">
+      <button class="round" id="betDown" type="button" aria-label="Diminuir aposta">−</button>
+      <button class="spin" id="spinBtn" type="button">GIRAR</button>
+      <button class="round" id="betUp" type="button" aria-label="Aumentar aposta">+</button>
+    </div>
+    <div class="toggles">
+      <button class="toggle" id="turboBtn" type="button" aria-pressed="false">Turbo</button>
+      <button class="toggle" id="autoBtn" type="button" aria-pressed="false">Auto ×10</button>
+      <button class="toggle" id="reloadBtn" type="button">+1.000 fichas</button>
+    </div>
+    <p class="msg" id="msg">Espaço também gira.</p>
+  </section>
+
+  <section class="info">
+    <details>
+      <summary>Tabela de prêmios</summary>
+      <div class="details-body">
+        <table class="pay-table" id="payTable"></table>
+        <p class="note">Três iguais numa das 5 linhas pagam o valor × (aposta ÷ 5). O 🐯 substitui qualquer símbolo. Tela cheia do mesmo símbolo multiplica o ganho por 10.</p>
+        <p class="note">Tigre Sortudo: de vez em quando o tigre aparece e as bobinas giram de graça, com um único símbolo, até sair um prêmio.</p>
+        <p class="note">Retorno teórico de cerca de 95%: a cada 100 fichas apostadas, a máquina devolve uns 95 em média e fica com o resto. Olhe a linha "Resultado" abaixo depois de algumas centenas de giros.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Suas estatísticas</summary>
+      <div class="details-body">
+        <dl class="stats">
+          <div class="stat"><dt>Giros</dt><dd id="stSpins">0</dd></div>
+          <div class="stat"><dt>Apostado</dt><dd id="stBet">0</dd></div>
+          <div class="stat"><dt>Pago</dt><dd id="stWon">0</dd></div>
+          <div class="stat"><dt>Resultado</dt><dd id="stNet">0</dd></div>
+          <div class="stat"><dt>Retorno real</dt><dd id="stRtp">–</dd></div>
+          <div class="stat"><dt>Recargas</dt><dd id="stReloads">0</dd></div>
+        </dl>
+        <button class="ghost-btn" id="resetStats" type="button">Zerar estatísticas</button>
+      </div>
+    </details>
+
+    <p class="disclaimer">Jogo fictício para diversão. As fichas não valem nada: não dá para comprar, sacar nem trocar. Nenhum dinheiro de verdade está envolvido.</p>
+  </section>
+</div>
+
+<script>
+// ===== CORE START =====
+const SYMBOLS = {
+  wild:   { g: "🐯", name: "Tigre (wild)",    pay: 250, w: 4 },
+  env:    { g: "🧧", name: "Envelope vermelho", pay: 100, w: 3 },
+  dragon: { g: "🐉", name: "Dragão de jade",  pay: 25,  w: 5 },
+  bag:    { g: "💰", name: "Saco da sorte",   pay: 10,  w: 7 },
+  coin:   { g: "🪙", name: "Moeda de ouro",   pay: 8,   w: 8 },
+  fire:   { g: "🧨", name: "Bombinha",        pay: 5,   w: 10 },
+  orange: { g: "🍊", name: "Tangerina",       pay: 3,   w: 13 },
+  blank:  { g: "",   name: "",                pay: 0,   w: 0 },
+};
+
+// Cada linha é uma lista de [coluna, linha]. Índice 0 = linha 1 no pilar.
+const LINES = [
+  [[0, 1], [1, 1], [2, 1]],
+  [[0, 0], [1, 0], [2, 0]],
+  [[0, 2], [1, 2], [2, 2]],
+  [[0, 0], [1, 1], [2, 2]],
+  [[0, 2], [1, 1], [2, 0]],
+];
+
+const FEATURE_CHANCE = 1 / 60;
+const FEATURE_PICK = { orange: 30, fire: 25, coin: 18, bag: 14, dragon: 9, env: 4 };
+const FEATURE_SYMBOL_P = 0.3;
+const FEATURE_WILD_P = 0.06;
+const FULL_SCREEN_MULT = 10;
+
+const BASE_WEIGHTS = Object.fromEntries(
+  Object.entries(SYMBOLS).filter(([, s]) => s.w > 0).map(([id, s]) => [id, s.w])
+);
+
+function pickWeighted(weights, rand) {
+  const entries = Object.entries(weights);
+  let total = 0;
+  for (const [, w] of entries) total += w;
+  let x = rand() * total;
+  for (const [id, w] of entries) {
+    x -= w;
+    if (x < 0) return id;
+  }
+  return entries[entries.length - 1][0];
+}
+
+function makeGrid(cellFn) {
+  return [0, 1, 2].map(() => [0, 1, 2].map(cellFn));
+}
+
+function evaluate(grid) {
+  const wins = [];
+  let units = 0;
+  LINES.forEach((cells, line) => {
+    const ids = cells.map(([c, r]) => grid[c][r]);
+    if (ids.includes("blank")) return;
+    const base = ids.find((id) => id !== "wild") || "wild";
+    if (ids.every((id) => id === base || id === "wild")) {
+      wins.push({ line, sym: base, cells });
+      units += SYMBOLS[base].pay;
+    }
+  });
+  const flat = grid.flat();
+  const fullBase = flat.find((id) => id !== "wild") || "wild";
+  const full = !flat.includes("blank") && flat.every((id) => id === fullBase || id === "wild");
+  return { wins, units, full, mult: full ? FULL_SCREEN_MULT : 1 };
+}
+
+// Um giro completo. Devolve as grades a mostrar (várias no Tigre Sortudo) e o ganho em fichas.
+function playSpin(bet, rand) {
+  const lineBet = bet / 5;
+  if (rand() < FEATURE_CHANCE) {
+    const sym = pickWeighted(FEATURE_PICK, rand);
+    const grids = [];
+    let result;
+    for (let i = 0; i < 25; i++) {
+      const grid = makeGrid(() => {
+        const x = rand();
+        return x < FEATURE_SYMBOL_P ? sym : x < FEATURE_SYMBOL_P + FEATURE_WILD_P ? "wild" : "blank";
+      });
+      grids.push(grid);
+      result = evaluate(grid);
+      if (result.units > 0) break;
+    }
+    if (result.units === 0) {
+      const last = grids[grids.length - 1];
+      for (const [c, r] of LINES[0]) last[c][r] = sym;
+      result = evaluate(last);
+    }
+    return { feature: sym, grids, ...result, win: result.units * lineBet * result.mult };
+  }
+  const grid = makeGrid(() => pickWeighted(BASE_WEIGHTS, rand));
+  const result = evaluate(grid);
+  return { feature: null, grids: [grid], ...result, win: result.units * lineBet * result.mult };
+}
+// ===== CORE END =====
+
+(function () {
+  const BETS = [5, 10, 25, 50, 100, 250];
+  const START_BALANCE = 1000;
+  const STORE_KEY = "tigre-da-sorte-v1";
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Math.round(n).toLocaleString("pt-BR");
+  const rand = () => {
+    const a = new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0] / 4294967296;
+  };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let state = {
+    balance: START_BALANCE,
+    betIdx: 1,
+    turbo: false,
+    sound: true,
+    stats: { spins: 0, bet: 0, won: 0, reloads: 0 },
+  };
+  let busy = false;
+  let autoLeft = 0;
+  let currentGrid = makeGrid(() => pickWeighted(BASE_WEIGHTS, rand));
+
+  const reelEls = [...document.querySelectorAll(".reel .strip")];
+  const linesSvg = $("lines");
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
+  // ---------- som ----------
+  let audio = null;
+  function tone(freq, dur, type = "square", vol = 0.05, delay = 0) {
+    if (!state.sound) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audio.currentTime + delay;
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(gain).connect(audio.destination);
+      osc.start(t);
+      osc.stop(t + dur);
+    } catch (e) {}
+  }
+  const sfx = {
+    stop: () => tone(180, 0.08, "square", 0.04),
+    win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, "triangle", 0.06, i * 0.09)),
+    big: () => [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.22, "triangle", 0.07, i * 0.08)),
+    tiger: () => [220, 196, 262].forEach((f, i) => tone(f, 0.25, "sawtooth", 0.05, i * 0.12)),
+  };
+
+  // ---------- desenho ----------
+  const cellHTML = (id) =>
+    `<div class="sym s-${id}"><span>${SYMBOLS[id].g}</span></div>`;
+
+  function paintGrid(grid) {
+    reelEls.forEach((strip, c) => {
+      strip.style.transition = "none";
+      strip.style.transform = "none";
+      strip.innerHTML = grid[c].map(cellHTML).join("");
+    });
+  }
+
+  function spinReel(c, finalCol, duration, fillerCount, fillerFn) {
+    const strip = reelEls[c];
+    const fillers = Array.from({ length: fillerCount }, fillerFn);
+    const items = [...finalCol, ...fillers, ...currentGrid[c]];
+    const offset = ((items.length - 3) / items.length) * 100;
+    strip.style.transition = "none";
+    strip.innerHTML = items.map(cellHTML).join("");
+    strip.style.transform = `translateY(-${offset}%)`;
+    void strip.offsetHeight;
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        strip.style.transition = "none";
+        strip.style.transform = "none";
+        strip.innerHTML = finalCol.map(cellHTML).join("");
+        sfx.stop();
+        resolve();
+      };
+      strip.addEventListener("transitionend", finish, { once: true });
+      setTimeout(finish, duration + 150);
+      strip.style.transition = `transform ${duration}ms cubic-bezier(.15,.6,.25,1.04)`;
+      strip.style.transform = "translateY(0)";
+    });
+  }
+
+  async function animateGrid(grid, fast, fillerFn) {
+    clearHighlights();
+    const base = reduceMotion ? 120 : fast ? 380 : 900;
+    const step = reduceMotion ? 40 : fast ? 110 : 260;
+    const filler = fast ? 8 : 16;
+    await Promise.all(
+      [0, 1, 2].map((c) => spinReel(c, grid[c], base + c * step, filler + c * 4, fillerFn))
+    );
+    currentGrid = grid;
+  }
+
+  function clearHighlights() {
+    linesSvg.innerHTML = "";
+    document.querySelectorAll(".pillar span.on").forEach((el) => el.classList.remove("on"));
+    document.querySelectorAll(".sym.hit, .sym.dim").forEach((el) => el.classList.remove("hit", "dim"));
+  }
+
+  function showWins(wins) {
+    if (!wins.length) return;
+    const hit = new Set();
+    wins.forEach((w) => {
+      w.cells.forEach(([c, r]) => hit.add(`${c}-${r}`));
+      document.querySelectorAll(`.pillar span[data-line="${w.line}"]`).forEach((el) => el.classList.add("on"));
+      const pts = w.cells.map(([c, r]) => `${50 + c * 100},${50 + r * 100}`);
+      const [c0, r0] = w.cells[0];
+      const [c2, r2] = w.cells[2];
+      pts.unshift(`${4},${50 + r0 * 100 + (r2 - r0) * -23}`);
+      pts.push(`${296},${50 + r2 * 100 + (r2 - r0) * 23}`);
+      linesSvg.insertAdjacentHTML("beforeend", `<polyline points="${pts.join(" ")}"></polyline>`);
+    });
+    reelEls.forEach((strip, c) => {
+      [...strip.children].forEach((el, r) => el.classList.add(hit.has(`${c}-${r}`) ? "hit" : "dim"));
+    });
+  }
+
+  function banner(html, ms) {
+    const el = $("banner");
+    el.innerHTML = html;
+    el.hidden = false;
+    return new Promise((res) => setTimeout(() => { el.hidden = true; res(); }, ms));
+  }
+
+  function say(text) { $("bubble").textContent = text; }
+  function cheer() {
+    const m = $("mascot");
+    m.classList.remove("cheer");
+    void m.offsetWidth;
+    m.classList.add("cheer");
+  }
+
+  function render() {
+    const bet = BETS[state.betIdx];
+    $("balance").textContent = fmt(state.balance);
+    $("bet").textContent = fmt(bet);
+    $("betDown").disabled = busy || state.betIdx === 0;
+    $("betUp").disabled = busy || state.betIdx === BETS.length - 1;
+    $("spinBtn").disabled = busy && autoLeft === 0;
+    $("spinBtn").textContent = autoLeft > 0 ? `PARAR ${autoLeft}` : "GIRAR";
+    $("spinBtn").classList.toggle("stop", autoLeft > 0);
+    $("turboBtn").setAttribute("aria-pressed", String(state.turbo));
+    $("autoBtn").setAttribute("aria-pressed", String(autoLeft > 0));
+    $("soundBtn").setAttribute("aria-pressed", String(state.sound));
+    $("soundBtn").textContent = state.sound ? "Som ligado" : "Som desligado";
+
+    const s = state.stats;
+    const net = s.won - s.bet;
+    $("stSpins").textContent = fmt(s.spins);
+    $("stBet").textContent = fmt(s.bet);
+    $("stWon").textContent = fmt(s.won);
+    $("stNet").textContent = (net > 0 ? "+" : "") + fmt(net);
+    $("stNet").className = net < 0 ? "neg" : net > 0 ? "pos" : "";
+    $("stRtp").textContent = s.bet ? `${((s.won / s.bet) * 100).toFixed(1).replace(".", ",")}%` : "–";
+    $("stReloads").textContent = fmt(s.reloads);
+  }
+
+  function setMsg(text, good) {
+    const el = $("msg");
+    el.textContent = text;
+    el.classList.toggle("good", !!good);
+  }
+
+  // ---------- jogo ----------
+  async function spin() {
+    if (busy) return;
+    const bet = BETS[state.betIdx];
+    if (state.balance < bet) {
+      autoLeft = 0;
+      setMsg("Saldo insuficiente. Diminua a aposta ou pegue mais fichas (são de graça).");
+      say("Acabaram as fichas! Recarrega aí, é de mentira mesmo.");
+      render();
+      return;
+    }
+    busy = true;
+    state.balance -= bet;
+    state.stats.spins += 1;
+    state.stats.bet += bet;
+    $("win").textContent = "0";
+    setMsg(" ");
+    render();
+
+    const result = playSpin(bet, rand);
+    const fast = state.turbo || autoLeft > 0 && state.turbo;
+
+    if (result.feature) {
+      const sym = SYMBOLS[result.feature];
+      sfx.tiger();
+      cheer();
+      say(`RAWR! Tigre Sortudo com ${sym.g}!`);
+      await banner(`TIGRE SORTUDO!<small>só ${sym.g} até sair prêmio</small>`, reduceMotion ? 600 : 1400);
+      const filler = () => {
+        const x = rand();
+        return x < FEATURE_SYMBOL_P ? result.feature : x < FEATURE_SYMBOL_P + FEATURE_WILD_P ? "wild" : "blank";
+      };
+      for (const grid of result.grids) {
+        await animateGrid(grid, true, filler);
+      }
+    } else {
+      await animateGrid(result.grids[0], fast, () => pickWeighted(BASE_WEIGHTS, rand));
+    }
+
+    showWins(result.wins);
+    state.balance += result.win;
+    state.stats.won += result.win;
+    $("win").textContent = fmt(result.win);
+
+    const ratio = result.win / bet;
+    if (result.full) {
+      sfx.big();
+      cheer();
+      say("TELA CHEIA! Ganho ×10!");
+      setMsg(`Tela cheia: ${fmt(result.win)} fichas.`, true);
+      await banner(`TELA CHEIA<small>×10 · ${fmt(result.win)} fichas</small>`, 1600);
+    } else if (ratio >= 10) {
+      sfx.big();
+      cheer();
+      say("GANHO GRANDE!");
+      setMsg(`Ganho grande: ${fmt(result.win)} fichas (${fmt(ratio)}× a aposta).`, true);
+      await banner(`GANHO GRANDE<small>${fmt(result.win)} fichas</small>`, 1300);
+    } else if (result.win > 0) {
+      sfx.win();
+      cheer();
+      say(result.win > bet ? "Boa! Saiu prêmio." : "Saiu prêmio, mas menor que a aposta.");
+      setMsg(`${result.wins.length > 1 ? `${result.wins.length} linhas` : `Linha ${result.wins[0].line + 1}`}: +${fmt(result.win)} fichas.`, true);
+    } else {
+      say(["Nada dessa vez.", "Não saiu nada.", "A máquina ficou com essa.", "Zero nesse giro."][Math.floor(rand() * 4)]);
+      setMsg(`Sem prêmio. −${fmt(bet)} fichas.`);
+    }
+
+    busy = false;
+    save();
+    render();
+
+    if (autoLeft > 0) {
+      autoLeft -= 1;
+      render();
+      if (autoLeft > 0) {
+        setTimeout(() => { if (autoLeft > 0) spin(); }, state.turbo ? 350 : 700);
+      }
+    }
+  }
+
+  // ---------- controles ----------
+  $("spinBtn").addEventListener("click", () => {
+    if (autoLeft > 0) { autoLeft = 0; render(); return; }
+    spin();
+  });
+  $("betDown").addEventListener("click", () => { state.betIdx = Math.max(0, state.betIdx - 1); save(); render(); });
+  $("betUp").addEventListener("click", () => { state.betIdx = Math.min(BETS.length - 1, state.betIdx + 1); save(); render(); });
+  $("turboBtn").addEventListener("click", () => { state.turbo = !state.turbo; save(); render(); });
+  $("soundBtn").addEventListener("click", () => { state.sound = !state.sound; save(); render(); });
+  $("autoBtn").addEventListener("click", () => {
+    if (autoLeft > 0) { autoLeft = 0; render(); return; }
+    autoLeft = 10;
+    render();
+    spin();
+  });
+  $("reloadBtn").addEventListener("click", () => {
+    state.balance += START_BALANCE;
+    state.stats.reloads += 1;
+    say("Mais 1.000 fichas. Lembrete: isso só existe aqui.");
+    save();
+    render();
+  });
+  $("resetStats").addEventListener("click", () => {
+    state.stats = { spins: 0, bet: 0, won: 0, reloads: 0 };
+    save();
+    render();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !e.repeat && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLInputElement)) {
+      e.preventDefault();
+      spin();
+    }
+  });
+
+  $("payTable").innerHTML = Object.entries(SYMBOLS)
+    .filter(([, s]) => s.pay > 0)
+    .map(([, s]) => `<tr><td>${s.g}</td><td>${s.name}</td><td>3× → ${s.pay}× linha</td></tr>`)
+    .join("");
+
+  function start(data) {
+    const saved = data && data.state ? data.state : load();
+    if (saved && typeof saved.balance === "number") state = { ...state, ...saved, stats: { ...state.stats, ...saved.stats } };
+    if (data && data.grid) currentGrid = data.grid;
+    paintGrid(currentGrid);
+    render();
+  }
+
+  try { window.claude?.hot?.snapshot?.(() => ({ state, grid: currentGrid })); } catch (e) {}
+  if (window.claude?.hot?.ready) window.claude.hot.ready(start);
+  else start(window.claude?.hot?.data ?? null);
+})();
+</script>
+</body>
+</html>
