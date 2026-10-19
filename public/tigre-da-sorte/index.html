@@ -68,16 +68,6 @@
     text-shadow: 0 2px 0 var(--gold-deep), 0 4px 12px rgba(0, 0, 0, 0.45);
     letter-spacing: 0.01em;
   }
-  .chip {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-  }
   .ghost-btn {
     font: 600 13px var(--font-body);
     color: var(--cream);
@@ -343,14 +333,6 @@
   .stat dd.neg { color: var(--loss); }
   .stat dd.pos { color: var(--win); }
 
-  .disclaimer {
-    margin: 0;
-    font-size: 13px;
-    color: var(--muted);
-    text-align: center;
-    text-wrap: balance;
-  }
-
   @media (max-width: 380px) {
     :root { --pillar: 20px; --gap: 4px; }
     .controls { gap: 12px; }
@@ -367,7 +349,6 @@
   <header class="top">
     <div class="brand">
       <span class="brand-name">Tigre da Sorte</span>
-      <span class="chip">Fichas fictícias</span>
     </div>
     <button class="ghost-btn" id="soundBtn" type="button" aria-pressed="true">Som ligado</button>
   </header>
@@ -375,7 +356,7 @@
   <section class="stage" aria-label="Máquina">
     <div class="mascot-row">
       <div class="mascot" id="mascot" aria-hidden="true">🐯</div>
-      <div class="bubble" id="bubble" role="status">Bora girar? É tudo de mentirinha!</div>
+      <div class="bubble" id="bubble" role="status">Bora girar?</div>
     </div>
 
     <div class="machine">
@@ -449,8 +430,6 @@
         <button class="ghost-btn" id="resetStats" type="button">Zerar estatísticas</button>
       </div>
     </details>
-
-    <p class="disclaimer">Jogo fictício para diversão. As fichas não valem nada: não dá para comprar, sacar nem trocar. Nenhum dinheiro de verdade está envolvido.</p>
   </section>
 </div>
 
@@ -739,8 +718,8 @@ function playSpin(bet, rand) {
     const bet = BETS[state.betIdx];
     if (state.balance < bet) {
       autoLeft = 0;
-      setMsg("Saldo insuficiente. Diminua a aposta ou pegue mais fichas (são de graça).");
-      say("Acabaram as fichas! Recarrega aí, é de mentira mesmo.");
+      setMsg("Saldo insuficiente. Diminua a aposta ou pegue mais fichas.");
+      say("Acabaram as fichas! Recarrega aí.");
       render();
       return;
     }
@@ -831,7 +810,7 @@ function playSpin(bet, rand) {
   $("reloadBtn").addEventListener("click", () => {
     state.balance += START_BALANCE;
     state.stats.reloads += 1;
-    say("Mais 1.000 fichas. Lembrete: isso só existe aqui.");
+    say("Mais 1.000 fichas na conta!");
     save();
     render();
   });
